@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Conversor de Planilha</title>
+    <link rel="stylesheet" href="/static/css/styles.css?v=7">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-content">
+        <span class="school-name">EMEF Proc&oacute;pio Ferreira</span>
+        <span class="system-name">Sistema de resultados</span>
+      </div>
+    </header>
+
+    <main class="app">
+      <section class="panel">
+        <div class="panel-heading">
+          <span class="section-number">1</span>
+          <div>
+            <h1>Importar planilha</h1>
+            <p>Selecione o arquivo Excel com os resultados dos alunos.</p>
+          </div>
+        </div>
+
+        <form id="upload-form" class="upload-form">
+          <label class="file-field" for="spreadsheet-file">
+            <span>Planilha Excel</span>
+            <input id="spreadsheet-file" name="file" type="file" accept=".xlsx,.xlsm" required>
+          </label>
+
+          <div class="actions upload-actions">
+            <button type="submit">Converter planilha</button>
+            <button id="clear-button" type="button" class="secondary">Limpar dados</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel search-panel">
+        <div class="panel-heading">
+          <span class="section-number search-number">2</span>
+          <div>
+            <h2>Consultar aluno</h2>
+            <p>Informe o RA para localizar o resultado.</p>
+          </div>
+        </div>
+
+        <form id="search-form" class="search-form">
+          <label class="search-label" for="ra-search">RA do aluno</label>
+          <div class="search-control">
+            <input id="ra-search" type="search" inputmode="numeric" autocomplete="off" placeholder="Digite o RA">
+            <button id="search-button" type="submit">Buscar</button>
+          </div>
+        </form>
+
+        <p id="status-message" class="status" role="status">Digite o RA do aluno para realizar a busca.</p>
+      </section>
+
+      <section id="results-section" class="results-panel" aria-label="Resultados da busca" hidden>
+        <div id="student-result" class="student-result"></div>
+      </section>
+    </main>
+
+    <dialog id="report-modal" class="report-modal" aria-labelledby="report-title">
+      <div class="modal-toolbar">
+        <button id="print-report" class="print-button" type="button">Imprimir PDF</button>
+        <button id="close-modal" class="modal-close" type="button" aria-label="Fechar">&times;</button>
+      </div>
+
+      <article class="report-sheet">
+        <p class="report-school">EMEF Proc&oacute;pio Ferreira</p>
+        <h2 id="report-title">Resultado de prova</h2>
+
+        <div class="report-info">
+          <p><strong>Nome da prova:</strong> Saberes e Aprendizagens da SME-SP</p>
+          <p><strong>Referente ao per&iacute;odo:</strong> 1&ordm;, 2&ordm;, 3&ordm; e 4&ordm; Bimestre de 2026</p>
+        </div>
+
+        <p class="student-line"><strong>Turma:</strong> <span id="modal-class"></span> - <strong>Nome:</strong> <span id="modal-name"></span></p>
+
+        <div class="report-table-wrap">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Disciplina</th>
+                <th>Bimestre</th>
+                <th>Profici&ecirc;ncia</th>
+                <th>Profici&ecirc;ncia</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th rowspan="4">Portugu&ecirc;s</th><td>1&ordm; Bim</td><td id="port-score-1"></td><td id="port-level-1"></td></tr>
+              <tr><td>2&ordm; Bim</td><td id="port-score-2"></td><td id="port-level-2"></td></tr>
+              <tr><td>3&ordm; Bim</td><td id="port-score-3"></td><td id="port-level-3"></td></tr>
+              <tr><td>4&ordm; Bim</td><td id="port-score-4"></td><td id="port-level-4"></td></tr>
+              <tr><th rowspan="4">Matem&aacute;tica</th><td>1&ordm; Bim</td><td id="math-score-1"></td><td id="math-level-1"></td></tr>
+              <tr><td>2&ordm; Bim</td><td id="math-score-2"></td><td id="math-level-2"></td></tr>
+              <tr><td>3&ordm; Bim</td><td id="math-score-3"></td><td id="math-level-3"></td></tr>
+              <tr><td>4&ordm; Bim</td><td id="math-score-4"></td><td id="math-level-4"></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </dialog>
+
+    <script src="/static/js/script.js?v=7"></script>
+  </body>
+</html>

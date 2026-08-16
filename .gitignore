@@ -1,0 +1,19 @@
+# Segredos e configuracoes locais
+.env
+.env.*
+!.env.example
+
+# Dados de alunos e artefatos privados
+private/
+tmp/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.runtime/
+
+# Logs e arquivos do sistema
+*.log
+.DS_Store
+Thumbs.db
