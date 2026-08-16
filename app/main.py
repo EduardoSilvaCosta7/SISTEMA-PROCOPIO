@@ -1,19 +1,20 @@
 from pathlib import Path
+import re
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, field_validator
 
-from app.services.spreadsheet import (
-    ALLOWED_EXTENSIONS,
-    SpreadsheetReadError,
-    convert_spreadsheet,
+from app.services.supabase_results import (
+    DatabaseConfigurationError,
+    DatabaseUnavailableError,
+    SupabaseResultsClient,
 )
 
 
 APP_DIR = Path(__file__).resolve().parent
 WEB_DIR = APP_DIR / "web"
-MAX_UPLOAD_SIZE = 20 * 1024 * 1024
 
 app = FastAPI(
     title="Sistema de Resultados",
@@ -23,6 +24,18 @@ app = FastAPI(
 )
 
 
+class StudentSearch(BaseModel):
+    ra: str
+
+    @field_validator("ra")
+    @classmethod
+    def validate_ra(cls, value: str) -> str:
+        normalized = re.sub(r"[\s.\-]", "", value.strip())
+        if not normalized.isdigit() or not 4 <= len(normalized) <= 20:
+            raise ValueError("RA invalido")
+        return normalized
+
+
 @app.middleware("http")
 async def add_security_headers(request, call_next):
     response = await call_next(request)
@@ -30,6 +43,7 @@ async def add_security_headers(request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "no-referrer"
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Cache-Control"] = "no-store"
     return response
 
 
@@ -38,29 +52,20 @@ def index() -> FileResponse:
     return FileResponse(WEB_DIR / "index.html")
 
 
-@app.post("/api/convert")
-async def convert_uploaded_spreadsheet(file: UploadFile = File(...)) -> dict:
-    filename = Path(file.filename or "").name
-    suffix = Path(filename).suffix.lower()
-    if suffix not in ALLOWED_EXTENSIONS:
-        raise HTTPException(
-            status_code=400,
-            detail="Envie uma planilha nos formatos .xlsx ou .xlsm.",
-        )
-
-    contents = await file.read(MAX_UPLOAD_SIZE + 1)
-    if len(contents) > MAX_UPLOAD_SIZE:
-        raise HTTPException(
-            status_code=413,
-            detail="A planilha deve ter no maximo 20 MB.",
-        )
-    if not contents.startswith(b"PK"):
-        raise HTTPException(status_code=400, detail="O arquivo Excel e invalido.")
-
+@app.post("/api/search")
+async def search_student(search: StudentSearch) -> dict:
     try:
-        records = convert_spreadsheet(contents, filename)
-    except SpreadsheetReadError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        records = await SupabaseResultsClient.from_environment().search_by_ra(search.ra)
+    except DatabaseConfigurationError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Banco de dados ainda não configurado no servidor.",
+        ) from exc
+    except DatabaseUnavailableError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Não foi possível consultar o banco de dados.",
+        ) from exc
 
     return {"count": len(records), "records": records}
 

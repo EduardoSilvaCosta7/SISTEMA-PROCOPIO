@@ -1,9 +1,5 @@
-const STORAGE_KEY = "resultado_planilha_registros";
-
-const form = document.querySelector("#upload-form");
 const searchForm = document.querySelector("#search-form");
-const fileInput = document.querySelector("#spreadsheet-file");
-const clearButton = document.querySelector("#clear-button");
+const searchButton = document.querySelector("#search-button");
 const searchInput = document.querySelector("#ra-search");
 const statusMessage = document.querySelector("#status-message");
 const resultsSection = document.querySelector("#results-section");
@@ -14,45 +10,15 @@ const printReportButton = document.querySelector("#print-report");
 const modalClass = document.querySelector("#modal-class");
 const modalName = document.querySelector("#modal-name");
 
-let storedDataNeedsRefresh = false;
-let allRecords = getStoredRecords();
-
-function getStoredRecords() {
-  try {
-    const records = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    const hasOldFormat = records.some(
-      (record) =>
-        !Object.hasOwn(record, "proficiencia") &&
-        !Object.hasOwn(record, "Proficiência") &&
-        !Object.hasOwn(record, "ProficiÃªncia")
-    );
-
-    if (hasOldFormat) {
-      localStorage.removeItem(STORAGE_KEY);
-      storedDataNeedsRefresh = true;
-      return [];
-    }
-
-    return records;
-  } catch {
-    localStorage.removeItem(STORAGE_KEY);
-    return [];
-  }
-}
-
-function saveRecords(records) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
-}
-
 function setStatus(message, isError = false) {
   statusMessage.textContent = message;
   statusMessage.classList.toggle("error", isError);
 }
 
-function hideResults(message) {
+function hideResults(message, isError = false) {
   studentResult.innerHTML = "";
   resultsSection.hidden = true;
-  setStatus(message);
+  setStatus(message, isError);
 }
 
 function renderRecords(records) {
@@ -79,7 +45,6 @@ function renderRecords(records) {
   accessButton.type = "button";
   accessButton.textContent = "Acessar";
   accessButton.addEventListener("click", () => openReport(records));
-
   studentResult.append(identity, accessButton);
 }
 
@@ -88,10 +53,6 @@ function normalizeText(value) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
-}
-
-function getProficiency(record) {
-  return record.proficiencia ?? record["Proficiência"] ?? record["ProficiÃªncia"] ?? "";
 }
 
 function clearReport() {
@@ -110,14 +71,18 @@ function openReport(records) {
 
   records.forEach((record) => {
     const component = normalizeText(record.componente);
-    const subject = component.includes("matematica") ? "math" : component.includes("portugues") ? "port" : "";
+    const subject = component.includes("matematica")
+      ? "math"
+      : component.includes("portugues")
+        ? "port"
+        : "";
     const bimester = String(record.bimestre || "1").replace(/\D/g, "").slice(0, 1);
 
     if (!subject || !["1", "2", "3", "4"].includes(bimester)) {
       return;
     }
 
-    document.querySelector(`#${subject}-score-${bimester}`).textContent = getProficiency(record);
+    document.querySelector(`#${subject}-score-${bimester}`).textContent = record.proficiencia ?? "";
     document.querySelector(`#${subject}-level-${bimester}`).textContent = record.nivel ?? "";
   });
 
@@ -131,75 +96,48 @@ function normalizeRa(value) {
     .replace(/[\s.\-]/g, "");
 }
 
-function searchByRa() {
+async function readApiResponse(response) {
+  const text = await response.text();
+  if (!text) {
+    throw new Error("O servidor não retornou uma resposta.");
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error("O servidor retornou uma resposta inválida.");
+  }
+}
+
+async function searchByRa() {
   const ra = normalizeRa(searchInput.value);
   if (!ra) {
     hideResults("Digite o RA do aluno para realizar a busca.");
     return;
   }
 
-  if (allRecords.length === 0) {
-    hideResults("Nenhuma planilha foi importada. Converta a planilha antes de buscar.");
-    return;
-  }
-
-  const matches = allRecords.filter((record) => normalizeRa(record.ra) === ra);
-  renderRecords(matches);
-}
-
-async function readApiResponse(response) {
-  const text = await response.text();
-  if (!text) {
-    throw new Error(
-      "A API nao retornou dados. Verifique se o servidor FastAPI esta rodando em http://127.0.0.1:8000."
-    );
-  }
+  searchButton.disabled = true;
+  hideResults("Buscando aluno...");
 
   try {
-    return JSON.parse(text);
-  } catch {
-    throw new Error("A API retornou uma resposta invalida. Verifique o terminal do servidor FastAPI.");
-  }
-}
-
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  const file = fileInput.files[0];
-  if (!file) {
-    setStatus("Selecione uma planilha antes de converter.", true);
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const submitButton = form.querySelector("button[type='submit']");
-  submitButton.disabled = true;
-  setStatus("Convertendo planilha...");
-
-  try {
-    const response = await fetch("/api/convert", {
+    const response = await fetch("/api/search", {
       method: "POST",
-      body: formData,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ra }),
     });
     const payload = await readApiResponse(response);
 
     if (!response.ok) {
-      throw new Error(payload.detail || "Erro ao converter a planilha.");
+      throw new Error(payload.detail || "Não foi possível consultar o aluno.");
     }
 
-    allRecords = payload.records;
-    storedDataNeedsRefresh = false;
-    saveRecords(allRecords);
-    searchInput.value = "";
-    hideResults(`Planilha convertida com sucesso. ${allRecords.length} registros importados. Digite o RA para buscar.`);
+    renderRecords(payload.records || []);
   } catch (error) {
-    setStatus(error.message, true);
+    hideResults(error.message, true);
   } finally {
-    submitButton.disabled = false;
+    searchButton.disabled = false;
   }
-});
+}
 
 searchForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -207,18 +145,9 @@ searchForm.addEventListener("submit", (event) => {
 });
 
 searchInput.addEventListener("input", () => {
-  if (resultsSection.hidden) {
-    return;
+  if (!resultsSection.hidden) {
+    hideResults("Clique em Buscar para consultar o RA informado.");
   }
-  hideResults("Clique em Buscar para consultar o RA informado.");
-});
-
-clearButton.addEventListener("click", () => {
-  localStorage.removeItem(STORAGE_KEY);
-  allRecords = [];
-  fileInput.value = "";
-  searchInput.value = "";
-  hideResults("Digite o RA do aluno para realizar a busca.");
 });
 
 closeModalButton.addEventListener("click", () => reportModal.close());
@@ -230,8 +159,4 @@ reportModal.addEventListener("click", (event) => {
   }
 });
 
-hideResults(
-  storedDataNeedsRefresh
-    ? "Os dados antigos foram atualizados. Converta a planilha novamente para carregar as proficiências."
-    : "Digite o RA do aluno para realizar a busca."
-);
+hideResults("Digite o RA do aluno para realizar a busca.");

@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Conversor de Planilha</title>
-    <link rel="stylesheet" href="/static/css/styles.css?v=7">
+    <title>Sistema de Resultados</title>
+    <link rel="stylesheet" href="/static/css/styles.css?v=8">
   </head>
   <body>
     <header class="topbar">
@@ -15,33 +15,11 @@
     </header>
 
     <main class="app">
-      <section class="panel">
-        <div class="panel-heading">
-          <span class="section-number">1</span>
-          <div>
-            <h1>Importar planilha</h1>
-            <p>Selecione o arquivo Excel com os resultados dos alunos.</p>
-          </div>
-        </div>
-
-        <form id="upload-form" class="upload-form">
-          <label class="file-field" for="spreadsheet-file">
-            <span>Planilha Excel</span>
-            <input id="spreadsheet-file" name="file" type="file" accept=".xlsx,.xlsm" required>
-          </label>
-
-          <div class="actions upload-actions">
-            <button type="submit">Converter planilha</button>
-            <button id="clear-button" type="button" class="secondary">Limpar dados</button>
-          </div>
-        </form>
-      </section>
-
       <section class="panel search-panel">
         <div class="panel-heading">
-          <span class="section-number search-number">2</span>
+          <span class="section-number search-number">1</span>
           <div>
-            <h2>Consultar aluno</h2>
+            <h1>Consultar aluno</h1>
             <p>Informe o RA para localizar o resultado.</p>
           </div>
         </div>
@@ -104,6 +82,6 @@
       </article>
     </dialog>
 
-    <script src="/static/js/script.js?v=7"></script>
+    <script src="/static/js/script.js?v=8"></script>
   </body>
 </html>

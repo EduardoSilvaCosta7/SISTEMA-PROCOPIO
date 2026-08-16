@@ -103,19 +103,6 @@ body {
   background: var(--green);
 }
 
-.upload-form {
-  display: grid;
-  gap: 16px;
-}
-
-.file-field {
-  display: grid;
-  gap: 8px;
-  color: #334252;
-  font-size: 14px;
-  font-weight: 600;
-}
-
 .search-form {
   display: grid;
   gap: 8px;
@@ -127,7 +114,6 @@ body {
   font-weight: 600;
 }
 
-input[type="file"],
 input[type="search"] {
   width: 100%;
   min-height: 46px;
@@ -139,10 +125,6 @@ input[type="search"] {
   font: inherit;
 }
 
-input[type="file"] {
-  background: #f8fafb;
-}
-
 input[type="search"]:focus {
   border-color: var(--blue);
   box-shadow: 0 0 0 3px rgba(23, 105, 170, 0.14);
@@ -152,12 +134,6 @@ input[type="search"]:focus {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 120px;
   gap: 10px;
-}
-
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
 }
 
 button {
@@ -180,16 +156,6 @@ button:hover {
 button:disabled {
   cursor: wait;
   opacity: 0.7;
-}
-
-button.secondary {
-  border-color: #9ba9b6;
-  background: #ffffff;
-  color: #263442;
-}
-
-button.secondary:hover {
-  background: #eef3f7;
 }
 
 .status {
@@ -375,8 +341,7 @@ button.secondary:hover {
     grid-template-columns: 1fr;
   }
 
-  .search-control button,
-  .upload-actions button {
+  .search-control button {
     width: 100%;
   }
 
