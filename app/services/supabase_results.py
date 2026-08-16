@@ -25,7 +25,7 @@ class SupabaseResultsClient:
     @classmethod
     def from_environment(cls) -> "SupabaseResultsClient":
         url = os.getenv("SUPABASE_URL", "").strip()
-        secret_key = os.getenv("SUPABASE_SECRET_KEY", "").strip()
+        secret_key = os.getenv("sbkv", "").strip()
         if not url or not secret_key:
             raise DatabaseConfigurationError("Supabase environment is incomplete")
         return cls(url, secret_key)
