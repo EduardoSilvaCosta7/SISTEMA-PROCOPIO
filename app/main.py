@@ -62,9 +62,16 @@ async def search_student(search: StudentSearch) -> dict:
             detail="Banco de dados ainda não configurado no servidor.",
         ) from exc
     except DatabaseUnavailableError as exc:
+        messages = {
+            "credentials": "As credenciais do Supabase foram recusadas.",
+            "schema": "As tabelas necessárias não foram encontradas no Supabase.",
+        }
         raise HTTPException(
             status_code=503,
-            detail="Não foi possível consultar o banco de dados.",
+            detail=messages.get(
+                exc.reason,
+                "Não foi possível consultar o banco de dados.",
+            ),
         ) from exc
 
     return {"count": len(records), "records": records}

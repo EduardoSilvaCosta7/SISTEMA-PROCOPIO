@@ -1,6 +1,10 @@
 import os
+import logging
 
 import httpx
+
+
+logger = logging.getLogger(__name__)
 
 
 class DatabaseConfigurationError(Exception):
@@ -8,7 +12,9 @@ class DatabaseConfigurationError(Exception):
 
 
 class DatabaseUnavailableError(Exception):
-    pass
+    def __init__(self, reason: str = "unavailable") -> None:
+        self.reason = reason
+        super().__init__(reason)
 
 
 class SupabaseResultsClient:
@@ -24,8 +30,15 @@ class SupabaseResultsClient:
 
     @classmethod
     def from_environment(cls) -> "SupabaseResultsClient":
-        url = os.getenv("SUPABASE_URL", "").strip()
-        secret_key = os.getenv("sbkv", "").strip()
+        url = (
+            os.getenv("SUPABASE_URL", "").strip()
+            or os.getenv("NEXT_PUBLIC_SUPABASE_URL", "").strip()
+        )
+        secret_key = (
+            os.getenv("SUPABASE_SECRET_KEY", "").strip()
+            or os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+            or os.getenv("sbkv", "").strip()
+        )
         if not url or not secret_key:
             raise DatabaseConfigurationError("Supabase environment is incomplete")
         return cls(url, secret_key)
@@ -46,8 +59,27 @@ class SupabaseResultsClient:
                 response = await client.get(f"{self.base_url}/{table}", params=params)
                 response.raise_for_status()
                 data = response.json()
-        except (httpx.HTTPError, ValueError) as exc:
-            raise DatabaseUnavailableError("Supabase request failed") from exc
+        except httpx.HTTPStatusError as exc:
+            status_code = exc.response.status_code
+            error_code = ""
+            try:
+                error_code = str(exc.response.json().get("code", ""))
+            except (ValueError, AttributeError):
+                pass
+            logger.error(
+                "Supabase query failed table=%s status=%s code=%s",
+                table,
+                status_code,
+                error_code,
+            )
+            if status_code in {401, 403}:
+                raise DatabaseUnavailableError("credentials") from exc
+            if status_code == 404 or error_code in {"PGRST204", "PGRST205"}:
+                raise DatabaseUnavailableError("schema") from exc
+            raise DatabaseUnavailableError() from exc
+        except (httpx.RequestError, ValueError) as exc:
+            logger.error("Supabase connection failed table=%s", table)
+            raise DatabaseUnavailableError() from exc
 
         if not isinstance(data, list):
             raise DatabaseUnavailableError("Unexpected Supabase response")
