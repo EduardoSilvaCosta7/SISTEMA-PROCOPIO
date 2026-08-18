@@ -1,7 +1,9 @@
 from pathlib import Path
+import hmac
+import os
 import re
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, field_validator
@@ -11,10 +13,16 @@ from app.services.supabase_results import (
     DatabaseUnavailableError,
     SupabaseResultsClient,
 )
+from app.services.spreadsheet import (
+    ALLOWED_EXTENSIONS,
+    SpreadsheetReadError,
+    read_spreadsheet,
+)
 
 
 APP_DIR = Path(__file__).resolve().parent
 WEB_DIR = APP_DIR / "web"
+MAX_UPLOAD_SIZE = 4 * 1024 * 1024
 
 app = FastAPI(
     title="Sistema de Resultados",
@@ -75,6 +83,64 @@ async def search_student(search: StudentSearch) -> dict:
         ) from exc
 
     return {"count": len(records), "records": records}
+
+
+@app.post("/api/import")
+async def import_spreadsheet(
+    file: UploadFile = File(...),
+    import_key: str = Header(default="", alias="X-Import-Key"),
+) -> dict:
+    configured_key = os.getenv("IMPORT_SECRET", "").strip()
+    if not configured_key:
+        raise HTTPException(
+            status_code=503,
+            detail="Importação não configurada no servidor.",
+        )
+    if not hmac.compare_digest(import_key, configured_key):
+        raise HTTPException(status_code=403, detail="Código administrativo inválido.")
+
+    filename = Path(file.filename or "").name
+    if Path(filename).suffix.lower() not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail="Envie uma planilha .xlsx ou .xlsm.",
+        )
+
+    contents = await file.read(MAX_UPLOAD_SIZE + 1)
+    if len(contents) > MAX_UPLOAD_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail="Na Vercel, a planilha deve ter no máximo 4 MB.",
+        )
+    if not contents.startswith(b"PK"):
+        raise HTTPException(status_code=400, detail="O arquivo Excel é inválido.")
+
+    try:
+        records = read_spreadsheet(contents)
+        school_year = int(os.getenv("SCHOOL_YEAR", "2026"))
+        result = await SupabaseResultsClient.from_environment().import_records(
+            filename=filename,
+            school_year=school_year,
+            records=records,
+        )
+    except SpreadsheetReadError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except DatabaseConfigurationError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Banco de dados ainda não configurado no servidor.",
+        ) from exc
+    except DatabaseUnavailableError as exc:
+        messages = {
+            "credentials": "As credenciais do Supabase foram recusadas.",
+            "schema": "As tabelas necessárias não foram encontradas no Supabase.",
+        }
+        raise HTTPException(
+            status_code=503,
+            detail=messages.get(exc.reason, "Não foi possível gravar no banco de dados."),
+        ) from exc
+
+    return result
 
 
 app.mount("/static", StaticFiles(directory=WEB_DIR / "static"), name="static")

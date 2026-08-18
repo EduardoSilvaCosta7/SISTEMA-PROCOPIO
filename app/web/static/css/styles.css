@@ -114,7 +114,9 @@ body {
   font-weight: 600;
 }
 
-input[type="search"] {
+input[type="search"],
+input[type="password"],
+input[type="file"] {
   width: 100%;
   min-height: 46px;
   padding: 11px 13px;
@@ -125,9 +127,39 @@ input[type="search"] {
   font: inherit;
 }
 
-input[type="search"]:focus {
+input[type="search"]:focus,
+input[type="password"]:focus,
+input[type="file"]:focus {
   border-color: var(--blue);
   box-shadow: 0 0 0 3px rgba(23, 105, 170, 0.14);
+}
+
+input[type="file"] {
+  background: #f8fafb;
+}
+
+.import-panel {
+  margin-top: 18px;
+}
+
+.import-form {
+  display: grid;
+  gap: 10px;
+}
+
+.field-label {
+  color: #334252;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.import-form .field-label:not(:first-child) {
+  margin-top: 6px;
+}
+
+.import-form button {
+  width: fit-content;
+  margin-top: 6px;
 }
 
 .search-control {
@@ -342,6 +374,10 @@ button:disabled {
   }
 
   .search-control button {
+    width: 100%;
+  }
+
+  .import-form button {
     width: 100%;
   }
 

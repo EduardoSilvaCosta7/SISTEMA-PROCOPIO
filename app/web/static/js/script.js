@@ -9,10 +9,20 @@ const closeModalButton = document.querySelector("#close-modal");
 const printReportButton = document.querySelector("#print-report");
 const modalClass = document.querySelector("#modal-class");
 const modalName = document.querySelector("#modal-name");
+const importForm = document.querySelector("#import-form");
+const spreadsheetFile = document.querySelector("#spreadsheet-file");
+const importKey = document.querySelector("#import-key");
+const importButton = document.querySelector("#import-button");
+const importStatus = document.querySelector("#import-status");
 
 function setStatus(message, isError = false) {
   statusMessage.textContent = message;
   statusMessage.classList.toggle("error", isError);
+}
+
+function setImportStatus(message, isError = false) {
+  importStatus.textContent = message;
+  importStatus.classList.toggle("error", isError);
 }
 
 function hideResults(message, isError = false) {
@@ -57,9 +67,9 @@ function normalizeText(value) {
 
 function clearReport() {
   ["port", "math"].forEach((subject) => {
-    for (let bimester = 1; bimester <= 4; bimester += 1) {
-      document.querySelector(`#${subject}-score-${bimester}`).textContent = "";
-      document.querySelector(`#${subject}-level-${bimester}`).textContent = "";
+    for (let semester = 1; semester <= 2; semester += 1) {
+      document.querySelector(`#${subject}-score-${semester}`).textContent = "";
+      document.querySelector(`#${subject}-level-${semester}`).textContent = "";
     }
   });
 }
@@ -76,14 +86,14 @@ function openReport(records) {
       : component.includes("portugues")
         ? "port"
         : "";
-    const bimester = String(record.bimestre || "1").replace(/\D/g, "").slice(0, 1);
+    const semester = String(record.semestre || "").replace(/\D/g, "").slice(0, 1);
 
-    if (!subject || !["1", "2", "3", "4"].includes(bimester)) {
+    if (!subject || !["1", "2"].includes(semester)) {
       return;
     }
 
-    document.querySelector(`#${subject}-score-${bimester}`).textContent = record.proficiencia ?? "";
-    document.querySelector(`#${subject}-level-${bimester}`).textContent = record.nivel ?? "";
+    document.querySelector(`#${subject}-score-${semester}`).textContent = record.proficiencia ?? "";
+    document.querySelector(`#${subject}-level-${semester}`).textContent = record.nivel ?? "";
   });
 
   reportModal.showModal();
@@ -147,6 +157,48 @@ searchForm.addEventListener("submit", (event) => {
 searchInput.addEventListener("input", () => {
   if (!resultsSection.hidden) {
     hideResults("Clique em Buscar para consultar o RA informado.");
+  }
+});
+
+importForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const file = spreadsheetFile.files[0];
+  if (!file) {
+    setImportStatus("Selecione uma planilha antes de importar.", true);
+    return;
+  }
+  if (!importKey.value) {
+    setImportStatus("Informe o código administrativo.", true);
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+  importButton.disabled = true;
+  setImportStatus("Importando planilha...");
+
+  try {
+    const response = await fetch("/api/import", {
+      method: "POST",
+      headers: { "X-Import-Key": importKey.value },
+      body: formData,
+    });
+    const payload = await readApiResponse(response);
+
+    if (!response.ok) {
+      throw new Error(payload.detail || "Não foi possível importar a planilha.");
+    }
+
+    spreadsheetFile.value = "";
+    importKey.value = "";
+    setImportStatus(
+      `Importação concluída: ${payload.count} registros de ${payload.students} alunos.`,
+    );
+  } catch (error) {
+    setImportStatus(error.message, true);
+  } finally {
+    importButton.disabled = false;
   }
 });
 

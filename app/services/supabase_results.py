@@ -1,5 +1,6 @@
 import os
 import logging
+from datetime import UTC, datetime
 
 import httpx
 
@@ -85,6 +86,171 @@ class SupabaseResultsClient:
             raise DatabaseUnavailableError("Unexpected Supabase response")
         return data
 
+    async def _upsert(
+        self,
+        table: str,
+        rows: list[dict],
+        conflict_columns: str,
+        return_rows: bool = False,
+    ) -> list[dict]:
+        if not rows:
+            return []
+
+        headers = self._headers()
+        return_mode = "representation" if return_rows else "minimal"
+        headers["Prefer"] = f"resolution=merge-duplicates,return={return_mode}"
+        try:
+            async with httpx.AsyncClient(
+                headers=headers,
+                timeout=30.0,
+                transport=self.transport,
+            ) as client:
+                response = await client.post(
+                    f"{self.base_url}/{table}",
+                    params={"on_conflict": conflict_columns},
+                    json=rows,
+                )
+                response.raise_for_status()
+                if not return_rows:
+                    return []
+                data = response.json()
+        except httpx.HTTPStatusError as exc:
+            self._raise_database_error(table, exc)
+        except (httpx.RequestError, ValueError) as exc:
+            logger.error("Supabase connection failed table=%s", table)
+            raise DatabaseUnavailableError() from exc
+
+        if not isinstance(data, list):
+            raise DatabaseUnavailableError("Unexpected Supabase response")
+        return data
+
+    async def _delete(self, table: str, params: dict[str, str]) -> None:
+        headers = self._headers()
+        headers["Prefer"] = "return=minimal"
+        try:
+            async with httpx.AsyncClient(
+                headers=headers,
+                timeout=30.0,
+                transport=self.transport,
+            ) as client:
+                response = await client.delete(
+                    f"{self.base_url}/{table}",
+                    params=params,
+                )
+                response.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            self._raise_database_error(table, exc)
+        except httpx.RequestError as exc:
+            logger.error("Supabase connection failed table=%s", table)
+            raise DatabaseUnavailableError() from exc
+
+    def _raise_database_error(
+        self,
+        table: str,
+        exc: httpx.HTTPStatusError,
+    ) -> None:
+        status_code = exc.response.status_code
+        error_code = ""
+        try:
+            error_code = str(exc.response.json().get("code", ""))
+        except (ValueError, AttributeError):
+            pass
+        logger.error(
+            "Supabase query failed table=%s status=%s code=%s",
+            table,
+            status_code,
+            error_code,
+        )
+        if status_code in {401, 403}:
+            raise DatabaseUnavailableError("credentials") from exc
+        if status_code == 404 or error_code in {"PGRST204", "PGRST205"}:
+            raise DatabaseUnavailableError("schema") from exc
+        raise DatabaseUnavailableError() from exc
+
+    async def import_records(
+        self,
+        filename: str,
+        school_year: int,
+        records: list[dict],
+    ) -> dict:
+        imported_at = datetime.now(UTC).isoformat()
+        students = {
+            record["ra"]: {"ra": record["ra"], "nome": record["nome_aluno"]}
+            for record in records
+        }
+        enrollments = {
+            record["ra"]: {
+                "aluno_ra": record["ra"],
+                "ano_letivo": school_year,
+                "ano_escolar": record["ano_escolar"],
+                "turma": record["turma"],
+            }
+            for record in records
+        }
+        await self._upsert("alunos", list(students.values()), "ra")
+        await self._upsert(
+            "matriculas",
+            list(enrollments.values()),
+            "aluno_ra,ano_letivo",
+        )
+        semesters = sorted({record["semestre"] for record in records})
+        for semester in semesters:
+            spreadsheet_rows = await self._upsert(
+                "planilhas",
+                [
+                    {
+                        "nome_arquivo": filename,
+                        "ano_letivo": school_year,
+                        "semestre": semester,
+                        "bimestre": None,
+                        "importado_em": imported_at,
+                    }
+                ],
+                "nome_arquivo,ano_letivo,semestre",
+                return_rows=True,
+            )
+            if not spreadsheet_rows:
+                raise DatabaseUnavailableError()
+
+            spreadsheet_id = spreadsheet_rows[0]["id"]
+            semester_records = [
+                record for record in records if record["semestre"] == semester
+            ]
+            results = [
+                {
+                    "planilha_id": spreadsheet_id,
+                    "aluno_ra": record["ra"],
+                    "ano_letivo": school_year,
+                    "semestre": semester,
+                    "bimestre": None,
+                    "componente": record["componente"],
+                    "proficiencia": record["proficiencia"],
+                    "nivel": record["nivel"],
+                    "atualizado_em": imported_at,
+                }
+                for record in semester_records
+            ]
+
+            await self._delete(
+                "resultados",
+                {
+                    "ano_letivo": f"eq.{school_year}",
+                    "semestre": f"eq.{semester}",
+                },
+            )
+            for start in range(0, len(results), 500):
+                await self._upsert(
+                    "resultados",
+                    results[start : start + 500],
+                    "aluno_ra,ano_letivo,semestre,componente",
+                )
+
+        return {
+            "count": len(records),
+            "students": len(students),
+            "semesters": semesters,
+        }
+
     async def search_by_ra(self, ra: str) -> list[dict]:
         students = await self._select(
             "alunos",
@@ -109,10 +275,11 @@ class SupabaseResultsClient:
         results = await self._select(
             "resultados",
             {
-                "select": "ano_letivo,bimestre,componente,proficiencia,nivel",
+                "select": "ano_letivo,semestre,componente,proficiencia,nivel",
                 "aluno_ra": f"eq.{ra}",
                 "ano_letivo": f"eq.{enrollment['ano_letivo']}",
-                "order": "bimestre.asc,componente.asc",
+                "semestre": "not.is.null",
+                "order": "semestre.asc,componente.asc",
             },
         )
 
@@ -125,7 +292,7 @@ class SupabaseResultsClient:
                 "componente": result.get("componente", ""),
                 "proficiencia": result.get("proficiencia", ""),
                 "nivel": result.get("nivel", ""),
-                "bimestre": result.get("bimestre", ""),
+                "semestre": result.get("semestre", ""),
             }
             for result in results
         ]
