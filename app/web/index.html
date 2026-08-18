@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sistema de Resultados</title>
-    <link rel="stylesheet" href="/static/css/styles.css?v=12">
+    <link rel="stylesheet" href="/static/css/styles.css?v=13">
   </head>
   <body>
     <header class="topbar">
@@ -40,9 +40,47 @@
         <p id="status-message" class="status" role="status">Digite o RA do aluno para realizar a busca.</p>
       </section>
 
-      <section id="results-section" class="results-panel" aria-label="Resultados da busca" hidden>
-        <div id="student-result" class="student-result"></div>
-      </section>
+      <div id="results-workspace" class="results-workspace" hidden>
+        <section id="results-section" class="results-panel" aria-label="Resultados da busca">
+          <div id="student-result" class="student-result"></div>
+        </section>
+
+        <aside id="report-preview" class="report-preview" aria-label="Preview do relatório" hidden>
+          <article class="report-sheet">
+            <p class="report-school">EMEF Proc&oacute;pio Ferreira</p>
+            <h2 id="report-title">Resultado de prova</h2>
+
+            <div class="report-info">
+              <p><strong>Nome da prova:</strong> Saberes e Aprendizagens da SME-SP</p>
+              <p><strong>Referente ao per&iacute;odo:</strong> 1&ordm; e 2&ordm; Semestre de 2026</p>
+            </div>
+
+            <p class="student-line"><strong>Turma:</strong> <span id="modal-class"></span> - <strong>Nome:</strong> <span id="modal-name"></span></p>
+
+            <div class="report-table-wrap">
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Disciplina</th>
+                    <th>Semestre</th>
+                    <th>Profici&ecirc;ncia</th>
+                    <th>N&iacute;vel</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><th rowspan="2">Portugu&ecirc;s</th><td>1&ordm; Sem</td><td id="port-score-1"></td><td id="port-level-1"></td></tr>
+                  <tr><td>2&ordm; Sem</td><td id="port-score-2"></td><td id="port-level-2"></td></tr>
+                  <tr><th rowspan="2">Matem&aacute;tica</th><td>1&ordm; Sem</td><td id="math-score-1"></td><td id="math-level-1"></td></tr>
+                  <tr><td>2&ordm; Sem</td><td id="math-score-2"></td><td id="math-level-2"></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+          <div class="preview-actions">
+            <button id="print-report" class="print-button" type="button">Imprimir PDF</button>
+          </div>
+        </aside>
+      </div>
 
       <section class="panel import-panel">
         <div class="panel-heading">
@@ -64,44 +102,6 @@
       </section>
     </main>
 
-    <dialog id="report-modal" class="report-modal" aria-labelledby="report-title">
-      <div class="modal-toolbar">
-        <button id="print-report" class="print-button" type="button">Imprimir PDF</button>
-        <button id="close-modal" class="modal-close" type="button" aria-label="Fechar">&times;</button>
-      </div>
-
-      <article class="report-sheet">
-        <p class="report-school">EMEF Proc&oacute;pio Ferreira</p>
-        <h2 id="report-title">Resultado de prova</h2>
-
-        <div class="report-info">
-          <p><strong>Nome da prova:</strong> Saberes e Aprendizagens da SME-SP</p>
-          <p><strong>Referente ao per&iacute;odo:</strong> 1&ordm; e 2&ordm; Semestre de 2026</p>
-        </div>
-
-        <p class="student-line"><strong>Turma:</strong> <span id="modal-class"></span> - <strong>Nome:</strong> <span id="modal-name"></span></p>
-
-        <div class="report-table-wrap">
-          <table class="report-table">
-            <thead>
-              <tr>
-                <th>Disciplina</th>
-                <th>Semestre</th>
-                <th>Profici&ecirc;ncia</th>
-                <th>Profici&ecirc;ncia</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><th rowspan="2">Portugu&ecirc;s</th><td>1&ordm; Sem</td><td id="port-score-1"></td><td id="port-level-1"></td></tr>
-              <tr><td>2&ordm; Sem</td><td id="port-score-2"></td><td id="port-level-2"></td></tr>
-              <tr><th rowspan="2">Matem&aacute;tica</th><td>1&ordm; Sem</td><td id="math-score-1"></td><td id="math-level-1"></td></tr>
-              <tr><td>2&ordm; Sem</td><td id="math-score-2"></td><td id="math-level-2"></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </article>
-    </dialog>
-
-    <script src="/static/js/script.js?v=13"></script>
+    <script src="/static/js/script.js?v=14"></script>
   </body>
 </html>

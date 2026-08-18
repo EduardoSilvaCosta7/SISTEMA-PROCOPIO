@@ -5,10 +5,10 @@ const searchLabel = document.querySelector("#search-label");
 const modeRaButton = document.querySelector("#mode-ra");
 const modeClassButton = document.querySelector("#mode-class");
 const statusMessage = document.querySelector("#status-message");
+const resultsWorkspace = document.querySelector("#results-workspace");
 const resultsSection = document.querySelector("#results-section");
 const studentResult = document.querySelector("#student-result");
-const reportModal = document.querySelector("#report-modal");
-const closeModalButton = document.querySelector("#close-modal");
+const reportPreview = document.querySelector("#report-preview");
 const printReportButton = document.querySelector("#print-report");
 const modalClass = document.querySelector("#modal-class");
 const modalName = document.querySelector("#modal-name");
@@ -30,12 +30,14 @@ function setImportStatus(message, isError = false) {
 
 function hideResults(message, isError = false) {
   studentResult.innerHTML = "";
-  resultsSection.hidden = true;
+  resultsWorkspace.hidden = true;
+  resultsWorkspace.classList.remove("has-preview");
+  reportPreview.hidden = true;
   setStatus(message, isError);
 }
 
 function renderStudents(students, accessStudent) {
-  resultsSection.hidden = false;
+  resultsWorkspace.hidden = false;
   studentResult.innerHTML = "";
   studentResult.className = "student-result";
   setStatus("");
@@ -109,7 +111,9 @@ function openReport(records) {
     document.querySelector(`#${subject}-level-${semester}`).textContent = record.nivel ?? "";
   });
 
-  reportModal.showModal();
+  reportPreview.hidden = false;
+  resultsWorkspace.hidden = false;
+  resultsWorkspace.classList.add("has-preview");
 }
 
 function normalizeRa(value) {
@@ -173,8 +177,15 @@ async function loadStudentReport(student, button) {
     if (records.length === 0) {
       throw new Error("Nenhum resultado encontrado para este aluno.");
     }
+    document.querySelectorAll(".student-row, .tree-student-row").forEach((row) => {
+      row.classList.remove("selected");
+    });
+    button.closest(".student-row, .tree-student-row")?.classList.add("selected");
     setStatus("");
     openReport(records);
+    if (window.matchMedia("(max-width: 960px)").matches) {
+      reportPreview.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   } catch (error) {
     setStatus(error.message, true);
   } finally {
@@ -202,7 +213,7 @@ async function searchByRa() {
 }
 
 function renderClassTree(schoolYear, classes) {
-  resultsSection.hidden = false;
+  resultsWorkspace.hidden = false;
   studentResult.innerHTML = "";
   studentResult.className = "student-result folder-tree";
 
@@ -354,7 +365,7 @@ modeRaButton.addEventListener("click", () => setSearchMode("ra"));
 modeClassButton.addEventListener("click", () => setSearchMode("class"));
 
 searchInput.addEventListener("input", () => {
-  if (!resultsSection.hidden) {
+  if (!resultsWorkspace.hidden) {
     hideResults("Clique em Buscar para realizar a consulta.");
   }
 });
@@ -391,13 +402,6 @@ importForm.addEventListener("submit", async (event) => {
   }
 });
 
-closeModalButton.addEventListener("click", () => reportModal.close());
 printReportButton.addEventListener("click", () => window.print());
-
-reportModal.addEventListener("click", (event) => {
-  if (event.target === reportModal) {
-    reportModal.close();
-  }
-});
 
 setSearchMode("ra");
