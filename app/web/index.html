@@ -25,11 +25,11 @@
         </div>
 
         <div class="search-mode" role="group" aria-label="Forma de busca">
-          <button id="mode-ra" class="mode-button active" type="button" aria-pressed="true">RA</button>
-          <button id="mode-class" class="mode-button" type="button" aria-pressed="false">Turmas</button>
+          <button id="mode-ra" class="mode-button" type="button" aria-pressed="false">RA</button>
+          <button id="mode-class" class="mode-button active" type="button" aria-pressed="true">Turmas</button>
         </div>
 
-        <form id="search-form" class="search-form">
+        <form id="search-form" class="search-form" hidden>
           <label id="search-label" class="search-label" for="ra-search">RA do aluno</label>
           <div class="search-control">
             <input id="ra-search" type="search" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="Digite o RA">
@@ -37,7 +37,7 @@
           </div>
         </form>
 
-        <p id="status-message" class="status" role="status">Digite o RA do aluno para realizar a busca.</p>
+        <p id="status-message" class="status" role="status">Carregando pastas de turmas...</p>
       </section>
 
       <div id="results-workspace" class="results-workspace" hidden>
@@ -102,6 +102,6 @@
       </section>
     </main>
 
-    <script src="/static/js/script.js?v=14"></script>
+    <script src="/static/js/script.js?v=15"></script>
   </body>
 </html>

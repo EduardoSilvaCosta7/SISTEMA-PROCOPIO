@@ -214,6 +214,8 @@ async function searchByRa() {
 
 function renderClassTree(schoolYear, classes) {
   resultsWorkspace.hidden = false;
+  resultsWorkspace.classList.add("has-preview");
+  reportPreview.hidden = true;
   studentResult.innerHTML = "";
   studentResult.className = "student-result folder-tree";
 
@@ -404,4 +406,4 @@ importForm.addEventListener("submit", async (event) => {
 
 printReportButton.addEventListener("click", () => window.print());
 
-setSearchMode("ra");
+setSearchMode("class");
