@@ -336,6 +336,31 @@ button:disabled {
   position: relative;
 }
 
+.tree-class-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tree-class-header .tree-toggle {
+  flex: 1;
+}
+
+.print-class-button {
+  min-height: 32px;
+  padding: 0 12px;
+  border-color: var(--green);
+  background: #ffffff;
+  color: var(--green);
+  font-size: 12px;
+}
+
+.print-class-button:hover {
+  border-color: var(--green);
+  background: var(--green);
+  color: #ffffff;
+}
+
 .tree-class::before {
   position: absolute;
   top: 21px;
@@ -465,6 +490,10 @@ button:disabled {
 
 .preview-actions .print-button {
   width: min(240px, 100%);
+}
+
+.class-print-area {
+  display: none;
 }
 
 .report-modal::backdrop {
@@ -637,6 +666,15 @@ button:disabled {
     width: 100%;
   }
 
+  .tree-class-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .print-class-button {
+    width: 100%;
+  }
+
   .report-sheet {
     padding: 0 18px 24px;
   }
@@ -743,5 +781,90 @@ button:disabled {
     background: #b8d3e9 !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
+  }
+}
+
+@media print {
+  body.printing-class > .topbar,
+  body.printing-class > .app {
+    display: none !important;
+  }
+
+  body.printing-class > .class-print-area {
+    display: block !important;
+  }
+
+  .class-print-page {
+    display: grid;
+    width: 277mm;
+    height: 190mm;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    gap: 3mm;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .class-print-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .mini-report {
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    padding: 3mm;
+    border: 1px solid #111111;
+    color: #111111;
+    font-family: Arial, Helvetica, sans-serif;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .mini-report p {
+    margin: 0 0 1.2mm;
+    font-size: 7.5pt;
+    line-height: 1.15;
+  }
+
+  .mini-report .mini-school {
+    font-size: 9pt;
+    font-style: italic;
+    font-weight: 700;
+  }
+
+  .mini-report h2 {
+    width: fit-content;
+    margin: 0 auto 2mm;
+    border-bottom: 1px solid #111111;
+    font-size: 11pt;
+  }
+
+  .mini-report-table {
+    width: 100%;
+    margin-top: 1.5mm;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 6.8pt;
+  }
+
+  .mini-report-table th,
+  .mini-report-table td {
+    height: 5.5mm;
+    padding: 0.5mm 1mm;
+    overflow: hidden;
+    border: 1px solid #111111;
+    text-align: center;
+  }
+
+  .mini-report-table thead th {
+    background: #b8d3e9 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .mini-report-table th:first-child {
+    width: 23%;
   }
 }

@@ -363,3 +363,48 @@ class SupabaseResultsClient:
             ]
 
         return sorted(classes, key=natural_key)
+
+    async def reports_by_class(
+        self,
+        school_class: str,
+        school_year: int,
+    ) -> list[dict]:
+        students = await self.search_by_class(school_class, school_year)
+        if not students:
+            return []
+
+        student_by_ra = {student["ra"]: student for student in students}
+        ra_filter = ",".join(student_by_ra)
+        results = await self._select(
+            "resultados",
+            {
+                "select": "aluno_ra,ano_letivo,semestre,componente,proficiencia,nivel",
+                "aluno_ra": f"in.({ra_filter})",
+                "ano_letivo": f"eq.{school_year}",
+                "semestre": "not.is.null",
+                "order": "aluno_ra.asc,semestre.asc,componente.asc",
+            },
+        )
+
+        records_by_ra: dict[str, list[dict]] = {
+            ra: [] for ra in student_by_ra
+        }
+        for result in results:
+            ra = str(result.get("aluno_ra", ""))
+            student = student_by_ra.get(ra)
+            if not student:
+                continue
+            records_by_ra[ra].append(
+                {
+                    **student,
+                    "componente": result.get("componente", ""),
+                    "proficiencia": result.get("proficiencia", ""),
+                    "nivel": result.get("nivel", ""),
+                    "semestre": result.get("semestre", ""),
+                }
+            )
+
+        return [
+            {**student, "records": records_by_ra[student["ra"]]}
+            for student in students
+        ]

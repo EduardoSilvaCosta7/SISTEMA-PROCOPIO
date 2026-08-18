@@ -16,6 +16,7 @@ const importForm = document.querySelector("#import-form");
 const spreadsheetFile = document.querySelector("#spreadsheet-file");
 const importButton = document.querySelector("#import-button");
 const importStatus = document.querySelector("#import-status");
+const classPrintArea = document.querySelector("#class-print-area");
 let searchMode = "ra";
 
 function setStatus(message, isError = false) {
@@ -257,6 +258,8 @@ function renderClassTree(schoolYear, classes) {
 function createClassFolder(schoolClass) {
   const item = document.createElement("div");
   item.className = "tree-item tree-class";
+  const header = document.createElement("div");
+  header.className = "tree-class-header";
   const button = document.createElement("button");
   button.className = "tree-toggle";
   button.type = "button";
@@ -271,6 +274,15 @@ function createClassFolder(schoolClass) {
   const label = document.createElement("strong");
   label.textContent = schoolClass;
   button.append(chevron, folder, label);
+
+  const printClassButton = document.createElement("button");
+  printClassButton.className = "print-class-button";
+  printClassButton.type = "button";
+  printClassButton.textContent = "Imprimir turma";
+  printClassButton.addEventListener("click", () => {
+    printWholeClass(schoolClass, printClassButton);
+  });
+  header.append(button, printClassButton);
 
   const studentsContainer = document.createElement("div");
   studentsContainer.className = "tree-students";
@@ -338,8 +350,116 @@ function createClassFolder(schoolClass) {
     }
   });
 
-  item.append(button, studentsContainer);
+  item.append(header, studentsContainer);
   return item;
+}
+
+function reportValue(records, subjectName, semester, field) {
+  const record = records.find((item) => {
+    const component = normalizeText(item.componente);
+    return component.includes(subjectName) && Number(item.semestre) === semester;
+  });
+  return record?.[field] ?? "";
+}
+
+function createMiniReport(report) {
+  const article = document.createElement("article");
+  article.className = "mini-report";
+
+  const school = document.createElement("p");
+  school.className = "mini-school";
+  school.textContent = "EMEF Procópio Ferreira";
+  const title = document.createElement("h2");
+  title.textContent = "Resultado de prova";
+  const testName = document.createElement("p");
+  testName.innerHTML = "<strong>Nome da prova:</strong> Saberes e Aprendizagens da SME-SP";
+  const period = document.createElement("p");
+  period.innerHTML = "<strong>Período:</strong> 1º e 2º Semestre de 2026";
+  const student = document.createElement("p");
+  const studentLabel = document.createElement("strong");
+  studentLabel.textContent = `Turma: ${report.turma ?? ""} - Nome: `;
+  student.append(studentLabel, document.createTextNode(report.nome_aluno ?? ""));
+  article.append(school, title, testName, period, student);
+
+  const table = document.createElement("table");
+  table.className = "mini-report-table";
+  const head = document.createElement("thead");
+  const headRow = document.createElement("tr");
+  ["Disciplina", "Semestre", "Proficiência", "Nível"].forEach((text) => {
+    const cell = document.createElement("th");
+    cell.textContent = text;
+    headRow.append(cell);
+  });
+  head.append(headRow);
+  table.append(head);
+
+  const body = document.createElement("tbody");
+  [
+    ["Português", "portugues"],
+    ["Matemática", "matematica"],
+  ].forEach(([labelText, subjectName]) => {
+    [1, 2].forEach((semester) => {
+      const row = document.createElement("tr");
+      if (semester === 1) {
+        const subject = document.createElement("th");
+        subject.rowSpan = 2;
+        subject.textContent = labelText;
+        row.append(subject);
+      }
+      const semesterCell = document.createElement("td");
+      semesterCell.textContent = `${semester}º Sem`;
+      const score = document.createElement("td");
+      score.textContent = reportValue(report.records || [], subjectName, semester, "proficiencia");
+      const level = document.createElement("td");
+      level.textContent = reportValue(report.records || [], subjectName, semester, "nivel");
+      row.append(semesterCell, score, level);
+      body.append(row);
+    });
+  });
+  table.append(body);
+  article.append(table);
+  return article;
+}
+
+function renderClassPrint(reports) {
+  classPrintArea.innerHTML = "";
+  for (let start = 0; start < reports.length; start += 6) {
+    const page = document.createElement("section");
+    page.className = "class-print-page";
+    reports.slice(start, start + 6).forEach((report) => {
+      page.append(createMiniReport(report));
+    });
+    classPrintArea.append(page);
+  }
+}
+
+async function printWholeClass(schoolClass, button) {
+  button.disabled = true;
+  setStatus(`Preparando os boletins da turma ${schoolClass}...`);
+  try {
+    const payload = await requestJson("/api/reports-class", { turma: schoolClass });
+    const reports = payload.reports || [];
+    if (reports.length === 0) {
+      throw new Error("Nenhum boletim encontrado para esta turma.");
+    }
+    renderClassPrint(reports);
+    classPrintArea.hidden = false;
+    document.body.classList.add("printing-class");
+    setStatus(`${reports.length} boletim(ns) preparados para impressão.`);
+    window.addEventListener(
+      "afterprint",
+      () => {
+        document.body.classList.remove("printing-class");
+        classPrintArea.hidden = true;
+      },
+      { once: true },
+    );
+    window.print();
+  } catch (error) {
+    setStatus(error.message, true);
+  } finally {
+    button.disabled = false;
+  }
 }
 
 async function loadClassTree() {

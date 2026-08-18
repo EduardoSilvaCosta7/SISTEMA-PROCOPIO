@@ -153,6 +153,35 @@ async def list_classes() -> dict:
     return {"count": len(classes), "school_year": school_year, "classes": classes}
 
 
+@app.post("/api/reports-class")
+async def reports_class(search: ClassSearch) -> dict:
+    try:
+        school_year = int(os.getenv("SCHOOL_YEAR", "2026"))
+        reports = await SupabaseResultsClient.from_environment().reports_by_class(
+            search.turma,
+            school_year,
+        )
+    except DatabaseConfigurationError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Banco de dados ainda não configurado no servidor.",
+        ) from exc
+    except DatabaseUnavailableError as exc:
+        messages = {
+            "credentials": "As credenciais do Supabase foram recusadas.",
+            "schema": "As tabelas necessárias não foram encontradas no Supabase.",
+        }
+        raise HTTPException(
+            status_code=503,
+            detail=messages.get(
+                exc.reason,
+                "Não foi possível consultar o banco de dados.",
+            ),
+        ) from exc
+
+    return {"count": len(reports), "reports": reports}
+
+
 @app.post("/api/import")
 async def import_spreadsheet(
     file: UploadFile = File(...),
