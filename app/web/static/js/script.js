@@ -1,6 +1,9 @@
 const searchForm = document.querySelector("#search-form");
 const searchButton = document.querySelector("#search-button");
 const searchInput = document.querySelector("#ra-search");
+const searchLabel = document.querySelector("#search-label");
+const modeRaButton = document.querySelector("#mode-ra");
+const modeClassButton = document.querySelector("#mode-class");
 const statusMessage = document.querySelector("#status-message");
 const resultsSection = document.querySelector("#results-section");
 const studentResult = document.querySelector("#student-result");
@@ -13,6 +16,7 @@ const importForm = document.querySelector("#import-form");
 const spreadsheetFile = document.querySelector("#spreadsheet-file");
 const importButton = document.querySelector("#import-button");
 const importStatus = document.querySelector("#import-status");
+let searchMode = "ra";
 
 function setStatus(message, isError = false) {
   statusMessage.textContent = message;
@@ -30,31 +34,41 @@ function hideResults(message, isError = false) {
   setStatus(message, isError);
 }
 
+function renderStudents(students, accessStudent) {
+  resultsSection.hidden = false;
+  studentResult.innerHTML = "";
+  studentResult.className = "student-result";
+  setStatus("");
+
+  students.forEach((student) => {
+    const row = document.createElement("div");
+    row.className = "student-row";
+
+    const identity = document.createElement("div");
+    identity.className = "student-identity";
+
+    const name = document.createElement("strong");
+    name.textContent = student.nome_aluno ?? "";
+    const details = document.createElement("span");
+    details.textContent = `Turma: ${student.turma ?? ""} · RA: ${student.ra ?? ""}`;
+    identity.append(name, details);
+
+    const accessButton = document.createElement("button");
+    accessButton.type = "button";
+    accessButton.textContent = "Acessar";
+    accessButton.addEventListener("click", () => accessStudent(student, accessButton));
+
+    row.append(identity, accessButton);
+    studentResult.append(row);
+  });
+}
+
 function renderRecords(records) {
   if (records.length === 0) {
     hideResults("Nenhum registro encontrado para este RA.");
     return;
   }
-
-  resultsSection.hidden = false;
-  studentResult.innerHTML = "";
-  setStatus("");
-
-  const student = records[0];
-  const identity = document.createElement("div");
-  identity.className = "student-identity";
-
-  const name = document.createElement("strong");
-  name.textContent = student.nome_aluno ?? "";
-  const schoolClass = document.createElement("span");
-  schoolClass.textContent = `Turma: ${student.turma ?? ""}`;
-  identity.append(name, schoolClass);
-
-  const accessButton = document.createElement("button");
-  accessButton.type = "button";
-  accessButton.textContent = "Acessar";
-  accessButton.addEventListener("click", () => openReport(records));
-  studentResult.append(identity, accessButton);
+  renderStudents([records[0]], () => openReport(records));
 }
 
 function normalizeText(value) {
@@ -110,11 +124,61 @@ async function readApiResponse(response) {
   if (!text) {
     throw new Error("O servidor não retornou uma resposta.");
   }
-
   try {
     return JSON.parse(text);
   } catch {
     throw new Error("O servidor retornou uma resposta inválida.");
+  }
+}
+
+async function requestJson(url, body) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const payload = await readApiResponse(response);
+  if (!response.ok) {
+    throw new Error(payload.detail || "Não foi possível realizar a consulta.");
+  }
+  return payload;
+}
+
+function setSearchMode(mode) {
+  searchMode = mode;
+  const isRa = mode === "ra";
+  modeRaButton.classList.toggle("active", isRa);
+  modeClassButton.classList.toggle("active", !isRa);
+  modeRaButton.setAttribute("aria-pressed", String(isRa));
+  modeClassButton.setAttribute("aria-pressed", String(!isRa));
+  searchForm.hidden = !isRa;
+  searchInput.value = "";
+  if (isRa) {
+    searchLabel.textContent = "RA do aluno";
+    searchInput.placeholder = "Digite o RA";
+    searchInput.inputMode = "numeric";
+    hideResults("Digite o RA do aluno para realizar a busca.");
+    searchInput.focus();
+  } else {
+    loadClassTree();
+  }
+}
+
+async function loadStudentReport(student, button) {
+  button.disabled = true;
+  setStatus(`Carregando resultado de ${student.nome_aluno}...`);
+  try {
+    const payload = await requestJson("/api/search", { ra: student.ra });
+    const records = payload.records || [];
+    if (records.length === 0) {
+      throw new Error("Nenhum resultado encontrado para este aluno.");
+    }
+    setStatus("");
+    openReport(records);
+  } catch (error) {
+    setStatus(error.message, true);
+  } finally {
+    button.disabled = false;
   }
 }
 
@@ -127,19 +191,8 @@ async function searchByRa() {
 
   searchButton.disabled = true;
   hideResults("Buscando aluno...");
-
   try {
-    const response = await fetch("/api/search", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ra }),
-    });
-    const payload = await readApiResponse(response);
-
-    if (!response.ok) {
-      throw new Error(payload.detail || "Não foi possível consultar o aluno.");
-    }
-
+    const payload = await requestJson("/api/search", { ra });
     renderRecords(payload.records || []);
   } catch (error) {
     hideResults(error.message, true);
@@ -148,41 +201,185 @@ async function searchByRa() {
   }
 }
 
+function renderClassTree(schoolYear, classes) {
+  resultsSection.hidden = false;
+  studentResult.innerHTML = "";
+  studentResult.className = "student-result folder-tree";
+
+  const yearItem = document.createElement("div");
+  yearItem.className = "tree-item tree-year";
+  const yearButton = document.createElement("button");
+  yearButton.className = "tree-toggle";
+  yearButton.type = "button";
+  yearButton.setAttribute("aria-expanded", "true");
+
+  const yearChevron = document.createElement("span");
+  yearChevron.className = "tree-chevron";
+  yearChevron.textContent = "▾";
+  const yearFolder = document.createElement("span");
+  yearFolder.className = "tree-folder-icon";
+  yearFolder.textContent = "📂";
+  const yearLabel = document.createElement("strong");
+  yearLabel.textContent = String(schoolYear);
+  yearButton.append(yearChevron, yearFolder, yearLabel);
+
+  const classesContainer = document.createElement("div");
+  classesContainer.className = "tree-children";
+  classes.forEach((schoolClass) => {
+    classesContainer.append(createClassFolder(schoolClass));
+  });
+
+  yearButton.addEventListener("click", () => {
+    const expanded = yearButton.getAttribute("aria-expanded") === "true";
+    yearButton.setAttribute("aria-expanded", String(!expanded));
+    yearChevron.textContent = expanded ? "▸" : "▾";
+    yearFolder.textContent = expanded ? "📁" : "📂";
+    classesContainer.hidden = expanded;
+  });
+
+  yearItem.append(yearButton, classesContainer);
+  studentResult.append(yearItem);
+}
+
+function createClassFolder(schoolClass) {
+  const item = document.createElement("div");
+  item.className = "tree-item tree-class";
+  const button = document.createElement("button");
+  button.className = "tree-toggle";
+  button.type = "button";
+  button.setAttribute("aria-expanded", "false");
+
+  const chevron = document.createElement("span");
+  chevron.className = "tree-chevron";
+  chevron.textContent = "▸";
+  const folder = document.createElement("span");
+  folder.className = "tree-folder-icon";
+  folder.textContent = "📁";
+  const label = document.createElement("strong");
+  label.textContent = schoolClass;
+  button.append(chevron, folder, label);
+
+  const studentsContainer = document.createElement("div");
+  studentsContainer.className = "tree-students";
+  studentsContainer.hidden = true;
+  let loaded = false;
+
+  button.addEventListener("click", async () => {
+    const expanded = button.getAttribute("aria-expanded") === "true";
+    if (expanded) {
+      button.setAttribute("aria-expanded", "false");
+      chevron.textContent = "▸";
+      folder.textContent = "📁";
+      studentsContainer.hidden = true;
+      return;
+    }
+
+    button.setAttribute("aria-expanded", "true");
+    chevron.textContent = "▾";
+    folder.textContent = "📂";
+    studentsContainer.hidden = false;
+    if (loaded) {
+      return;
+    }
+
+    button.disabled = true;
+    setStatus(`Carregando alunos da turma ${schoolClass}...`);
+    try {
+      const payload = await requestJson("/api/search-class", { turma: schoolClass });
+      const students = payload.students || [];
+      studentsContainer.innerHTML = "";
+      students.forEach((student) => {
+        const row = document.createElement("div");
+        row.className = "tree-student-row";
+        const identity = document.createElement("div");
+        identity.className = "student-identity";
+        const name = document.createElement("strong");
+        name.textContent = student.nome_aluno ?? "";
+        const ra = document.createElement("span");
+        ra.textContent = `RA: ${student.ra ?? ""}`;
+        identity.append(name, ra);
+
+        const accessButton = document.createElement("button");
+        accessButton.type = "button";
+        accessButton.textContent = "Acessar";
+        accessButton.addEventListener("click", () => loadStudentReport(student, accessButton));
+        row.append(identity, accessButton);
+        studentsContainer.append(row);
+      });
+      if (students.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "tree-empty";
+        empty.textContent = "Nenhum aluno encontrado nesta turma.";
+        studentsContainer.append(empty);
+      }
+      loaded = true;
+      setStatus(`${students.length} aluno(s) na turma ${schoolClass}.`);
+    } catch (error) {
+      setStatus(error.message, true);
+      button.setAttribute("aria-expanded", "false");
+      chevron.textContent = "▸";
+      folder.textContent = "📁";
+      studentsContainer.hidden = true;
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  item.append(button, studentsContainer);
+  return item;
+}
+
+async function loadClassTree() {
+  hideResults("Carregando pastas de turmas...");
+  try {
+    const payload = await requestJson("/api/classes", {});
+    const classes = payload.classes || [];
+    if (classes.length === 0) {
+      hideResults("Nenhuma turma encontrada.");
+      return;
+    }
+    renderClassTree(payload.school_year, classes);
+    setStatus(`${classes.length} turma(s) encontrada(s). Abra uma pasta para ver os alunos.`);
+  } catch (error) {
+    hideResults(error.message, true);
+  }
+}
+
 searchForm.addEventListener("submit", (event) => {
   event.preventDefault();
   searchByRa();
 });
 
+modeRaButton.addEventListener("click", () => setSearchMode("ra"));
+modeClassButton.addEventListener("click", () => setSearchMode("class"));
+
 searchInput.addEventListener("input", () => {
   if (!resultsSection.hidden) {
-    hideResults("Clique em Buscar para consultar o RA informado.");
+    hideResults("Clique em Buscar para realizar a consulta.");
   }
 });
 
 importForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-
   const file = spreadsheetFile.files[0];
   if (!file) {
     setImportStatus("Selecione uma planilha antes de importar.", true);
     return;
   }
+
   const formData = new FormData();
   formData.append("file", file);
   importButton.disabled = true;
   setImportStatus("Importando planilha...");
-
   try {
     const response = await fetch("/api/import", {
       method: "POST",
       body: formData,
     });
     const payload = await readApiResponse(response);
-
     if (!response.ok) {
       throw new Error(payload.detail || "Não foi possível importar a planilha.");
     }
-
     spreadsheetFile.value = "";
     setImportStatus(
       `Importação concluída: ${payload.count} registros de ${payload.students} alunos.`,
@@ -203,4 +400,4 @@ reportModal.addEventListener("click", (event) => {
   }
 });
 
-hideResults("Digite o RA do aluno para realizar a busca.");
+setSearchMode("ra");

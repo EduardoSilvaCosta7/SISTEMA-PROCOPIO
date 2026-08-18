@@ -1,5 +1,6 @@
 import os
 import logging
+import re
 from datetime import UTC, datetime
 
 import httpx
@@ -296,3 +297,69 @@ class SupabaseResultsClient:
             }
             for result in results
         ]
+
+    async def search_by_class(self, school_class: str, school_year: int) -> list[dict]:
+        enrollments = await self._select(
+            "matriculas",
+            {
+                "select": "aluno_ra,ano_escolar,turma",
+                "ano_letivo": f"eq.{school_year}",
+                "turma": f"ilike.{school_class}",
+                "order": "aluno_ra.asc",
+            },
+        )
+        if not enrollments:
+            return []
+
+        enrollment_by_ra = {
+            str(enrollment.get("aluno_ra", "")): enrollment
+            for enrollment in enrollments
+            if enrollment.get("aluno_ra")
+        }
+        ra_filter = ",".join(enrollment_by_ra)
+        students = await self._select(
+            "alunos",
+            {
+                "select": "ra,nome",
+                "ra": f"in.({ra_filter})",
+                "order": "nome.asc",
+            },
+        )
+
+        return [
+            {
+                "nome_aluno": student.get("nome", ""),
+                "ano_escolar": enrollment_by_ra[str(student.get("ra", ""))].get(
+                    "ano_escolar", ""
+                ),
+                "turma": enrollment_by_ra[str(student.get("ra", ""))].get(
+                    "turma", ""
+                ),
+                "ra": str(student.get("ra", "")),
+            }
+            for student in students
+            if str(student.get("ra", "")) in enrollment_by_ra
+        ]
+
+    async def list_classes(self, school_year: int) -> list[str]:
+        enrollments = await self._select(
+            "matriculas",
+            {
+                "select": "turma",
+                "ano_letivo": f"eq.{school_year}",
+                "order": "turma.asc",
+            },
+        )
+        classes = {
+            str(enrollment.get("turma", "")).strip()
+            for enrollment in enrollments
+            if str(enrollment.get("turma", "")).strip()
+        }
+
+        def natural_key(value: str) -> list[object]:
+            return [
+                int(part) if part.isdigit() else part.casefold()
+                for part in re.split(r"(\d+)", value)
+            ]
+
+        return sorted(classes, key=natural_key)

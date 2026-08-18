@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sistema de Resultados</title>
-    <link rel="stylesheet" href="/static/css/styles.css?v=10">
+    <link rel="stylesheet" href="/static/css/styles.css?v=12">
   </head>
   <body>
     <header class="topbar">
@@ -20,14 +20,19 @@
           <span class="section-number search-number">1</span>
           <div>
             <h1>Consultar aluno</h1>
-            <p>Informe o RA para localizar o resultado.</p>
+            <p>Localize um aluno pelo RA ou consulte uma turma.</p>
           </div>
         </div>
 
+        <div class="search-mode" role="group" aria-label="Forma de busca">
+          <button id="mode-ra" class="mode-button active" type="button" aria-pressed="true">RA</button>
+          <button id="mode-class" class="mode-button" type="button" aria-pressed="false">Turmas</button>
+        </div>
+
         <form id="search-form" class="search-form">
-          <label class="search-label" for="ra-search">RA do aluno</label>
+          <label id="search-label" class="search-label" for="ra-search">RA do aluno</label>
           <div class="search-control">
-            <input id="ra-search" type="search" inputmode="numeric" autocomplete="off" placeholder="Digite o RA">
+            <input id="ra-search" type="search" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="Digite o RA">
             <button id="search-button" type="submit">Buscar</button>
           </div>
         </form>
@@ -97,6 +102,6 @@
       </article>
     </dialog>
 
-    <script src="/static/js/script.js?v=11"></script>
+    <script src="/static/js/script.js?v=13"></script>
   </body>
 </html>

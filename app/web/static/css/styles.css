@@ -108,6 +108,35 @@ body {
   gap: 8px;
 }
 
+.search-mode {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(90px, 1fr));
+  margin-bottom: 18px;
+  padding: 3px;
+  border: 1px solid #aebbc7;
+  border-radius: 7px;
+  background: #f1f4f7;
+}
+
+.mode-button {
+  min-height: 38px;
+  padding: 0 18px;
+  border: 0;
+  background: transparent;
+  color: #405264;
+}
+
+.mode-button:hover {
+  border: 0;
+  background: #e3e9ee;
+}
+
+.mode-button.active,
+.mode-button.active:hover {
+  background: var(--navy);
+  color: #ffffff;
+}
+
 .search-label {
   color: #334252;
   font-size: 14px;
@@ -212,11 +241,113 @@ button:disabled {
 }
 
 .student-result {
+  display: grid;
+}
+
+.student-row {
   display: flex;
+  min-height: 78px;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  padding: 18px 20px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.student-row:last-child {
+  border-bottom: 0;
+}
+
+.folder-tree {
+  padding: 12px 16px 16px;
+}
+
+.tree-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 0;
+  background: transparent;
+  color: var(--navy);
+  text-align: left;
+}
+
+.tree-toggle:hover {
+  border: 0;
+  background: #edf3f7;
+  color: var(--navy);
+}
+
+.tree-toggle:disabled {
+  cursor: wait;
+}
+
+.tree-chevron {
+  width: 16px;
+  flex: 0 0 16px;
+  color: #526171;
+  font-size: 16px;
+  text-align: center;
+}
+
+.tree-folder-icon {
+  width: 24px;
+  flex: 0 0 24px;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.tree-children {
+  margin-left: 18px;
+  padding-left: 22px;
+  border-left: 1px dotted #8ea0b1;
+}
+
+.tree-class {
+  position: relative;
+}
+
+.tree-class::before {
+  position: absolute;
+  top: 21px;
+  left: -22px;
+  width: 17px;
+  border-top: 1px dotted #8ea0b1;
+  content: "";
+}
+
+.tree-students {
+  margin-left: 18px;
+  padding-left: 22px;
+  border-left: 1px dotted #b3bec8;
+}
+
+.tree-student-row {
+  display: flex;
+  min-height: 68px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e1e7ec;
+}
+
+.tree-student-row:last-child {
+  border-bottom: 0;
+}
+
+.tree-student-row button {
+  min-height: 38px;
+}
+
+.tree-empty {
+  margin: 0;
+  padding: 12px;
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .student-identity {
@@ -381,12 +512,36 @@ button:disabled {
     width: 100%;
   }
 
-  .student-result {
+  .student-row {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .student-result button {
+  .student-row button {
+    width: 100%;
+  }
+
+  .folder-tree {
+    padding: 10px;
+  }
+
+  .tree-children,
+  .tree-students {
+    margin-left: 10px;
+    padding-left: 14px;
+  }
+
+  .tree-class::before {
+    left: -14px;
+    width: 10px;
+  }
+
+  .tree-student-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .tree-student-row button {
     width: 100%;
   }
 

@@ -30,8 +30,12 @@ create unique index if not exists resultados_aluno_ano_semestre_componente_key
 create index if not exists resultados_ano_semestre_idx
   on public.resultados (ano_letivo, semestre);
 
--- Esta migracao realiza a troca solicitada e remove os resultados bimestrais antigos.
-delete from public.resultados;
-delete from public.planilhas;
+-- Remove somente dados do formato bimestral antigo. Importacoes semestrais
+-- existentes sao preservadas caso esta migracao seja executada novamente.
+delete from public.resultados
+where semestre is null;
+
+delete from public.planilhas
+where semestre is null;
 
 commit;

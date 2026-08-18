@@ -43,6 +43,18 @@ class StudentSearch(BaseModel):
         return normalized
 
 
+class ClassSearch(BaseModel):
+    turma: str
+
+    @field_validator("turma")
+    @classmethod
+    def validate_class(cls, value: str) -> str:
+        normalized = re.sub(r"\s+", "", value.strip()).upper()
+        if not re.fullmatch(r"[0-9A-ZÀ-Ü_-]{1,20}", normalized):
+            raise ValueError("Turma inválida")
+        return normalized
+
+
 @app.middleware("http")
 async def add_security_headers(request, call_next):
     response = await call_next(request)
@@ -82,6 +94,63 @@ async def search_student(search: StudentSearch) -> dict:
         ) from exc
 
     return {"count": len(records), "records": records}
+
+
+@app.post("/api/search-class")
+async def search_class(search: ClassSearch) -> dict:
+    try:
+        school_year = int(os.getenv("SCHOOL_YEAR", "2026"))
+        students = await SupabaseResultsClient.from_environment().search_by_class(
+            search.turma,
+            school_year,
+        )
+    except DatabaseConfigurationError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Banco de dados ainda não configurado no servidor.",
+        ) from exc
+    except DatabaseUnavailableError as exc:
+        messages = {
+            "credentials": "As credenciais do Supabase foram recusadas.",
+            "schema": "As tabelas necessárias não foram encontradas no Supabase.",
+        }
+        raise HTTPException(
+            status_code=503,
+            detail=messages.get(
+                exc.reason,
+                "Não foi possível consultar o banco de dados.",
+            ),
+        ) from exc
+
+    return {"count": len(students), "students": students}
+
+
+@app.post("/api/classes")
+async def list_classes() -> dict:
+    try:
+        school_year = int(os.getenv("SCHOOL_YEAR", "2026"))
+        classes = await SupabaseResultsClient.from_environment().list_classes(
+            school_year
+        )
+    except DatabaseConfigurationError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Banco de dados ainda não configurado no servidor.",
+        ) from exc
+    except DatabaseUnavailableError as exc:
+        messages = {
+            "credentials": "As credenciais do Supabase foram recusadas.",
+            "schema": "As tabelas necessárias não foram encontradas no Supabase.",
+        }
+        raise HTTPException(
+            status_code=503,
+            detail=messages.get(
+                exc.reason,
+                "Não foi possível consultar o banco de dados.",
+            ),
+        ) from exc
+
+    return {"count": len(classes), "school_year": school_year, "classes": classes}
 
 
 @app.post("/api/import")
