@@ -26,15 +26,14 @@ Configure em **Project Settings > Environment Variables**:
 
 - `NEXT_PUBLIC_SUPABASE_URL`: URL do projeto Supabase criada pela integracao.
 - `SUPABASE_SECRET_KEY`: chave secreta do Supabase criada pela integracao.
-- `IMPORT_SECRET`: codigo administrativo forte usado para autorizar importacoes.
 - `SCHOOL_YEAR`: ano letivo dos dados, por exemplo `2026`.
 
 Depois de criar ou alterar variaveis, faca um novo deploy na Vercel.
 
 ## Importar planilha
 
-A tela aceita arquivos `.xlsx` e `.xlsm`. A planilha deve possuir a coluna `SEMESTRE`, preenchida com `1º semestre` ou `2º semestre`. Selecione a planilha, informe no campo **Codigo administrativo** o mesmo valor configurado em `IMPORT_SECRET` e clique em **Importar planilha**.
+A tela aceita arquivos `.xlsx` e `.xlsm`. A planilha deve possuir a coluna `SEMESTRE`, preenchida com `1º semestre` ou `2º semestre`. Selecione a planilha e clique em **Importar planilha**.
 
-A API extrai somente os campos necessarios e grava os alunos, matriculas e resultados diretamente no Supabase. Uma nova importacao substitui os resultados existentes do mesmo semestre. A chave secreta do banco permanece apenas no backend e nunca deve ser colocada no codigo JavaScript ou informada no campo administrativo.
+A API extrai somente os campos necessarios e grava os alunos, matriculas e resultados diretamente no Supabase. Uma nova importacao substitui os resultados existentes do mesmo semestre. A chave secreta do banco permanece apenas no backend e nunca deve ser colocada no codigo JavaScript.
 
 Antes do primeiro envio no novo formato, execute `database/migrations/002_semester_results.sql` no SQL Editor do Supabase. Essa migracao adiciona o semestre e remove os resultados bimestrais antigos.

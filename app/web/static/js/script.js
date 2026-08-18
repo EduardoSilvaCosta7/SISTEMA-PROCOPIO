@@ -11,7 +11,6 @@ const modalClass = document.querySelector("#modal-class");
 const modalName = document.querySelector("#modal-name");
 const importForm = document.querySelector("#import-form");
 const spreadsheetFile = document.querySelector("#spreadsheet-file");
-const importKey = document.querySelector("#import-key");
 const importButton = document.querySelector("#import-button");
 const importStatus = document.querySelector("#import-status");
 
@@ -168,11 +167,6 @@ importForm.addEventListener("submit", async (event) => {
     setImportStatus("Selecione uma planilha antes de importar.", true);
     return;
   }
-  if (!importKey.value) {
-    setImportStatus("Informe o código administrativo.", true);
-    return;
-  }
-
   const formData = new FormData();
   formData.append("file", file);
   importButton.disabled = true;
@@ -181,7 +175,6 @@ importForm.addEventListener("submit", async (event) => {
   try {
     const response = await fetch("/api/import", {
       method: "POST",
-      headers: { "X-Import-Key": importKey.value },
       body: formData,
     });
     const payload = await readApiResponse(response);
@@ -191,7 +184,6 @@ importForm.addEventListener("submit", async (event) => {
     }
 
     spreadsheetFile.value = "";
-    importKey.value = "";
     setImportStatus(
       `Importação concluída: ${payload.count} registros de ${payload.students} alunos.`,
     );

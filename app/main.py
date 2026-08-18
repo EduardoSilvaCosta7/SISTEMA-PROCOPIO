@@ -1,9 +1,8 @@
 from pathlib import Path
-import hmac
 import os
 import re
 
-from fastapi import FastAPI, File, Header, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, field_validator
@@ -88,17 +87,7 @@ async def search_student(search: StudentSearch) -> dict:
 @app.post("/api/import")
 async def import_spreadsheet(
     file: UploadFile = File(...),
-    import_key: str = Header(default="", alias="X-Import-Key"),
 ) -> dict:
-    configured_key = os.getenv("IMPORT_SECRET", "").strip()
-    if not configured_key:
-        raise HTTPException(
-            status_code=503,
-            detail="Importação não configurada no servidor.",
-        )
-    if not hmac.compare_digest(import_key, configured_key):
-        raise HTTPException(status_code=403, detail="Código administrativo inválido.")
-
     filename = Path(file.filename or "").name
     if Path(filename).suffix.lower() not in ALLOWED_EXTENSIONS:
         raise HTTPException(
