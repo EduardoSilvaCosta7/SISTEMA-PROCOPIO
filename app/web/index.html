@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sistema de Resultados</title>
-    <link rel="stylesheet" href="/static/css/styles.css?v=14">
+    <link rel="stylesheet" href="/static/css/styles.css?v=15">
   </head>
   <body>
     <header class="topbar">
@@ -52,7 +52,7 @@
 
             <div class="report-info">
               <p><strong>Nome da prova:</strong> Saberes e Aprendizagens da SME-SP</p>
-              <p><strong>Referente ao per&iacute;odo:</strong> 1&ordm; e 2&ordm; Semestre de 2026</p>
+              <p><strong>Referente ao per&iacute;odo:</strong> 1&ordm;, 2&ordm;, 3&ordm; e 4&ordm; Bimestre de 2026</p>
             </div>
 
             <p class="student-line"><strong>Turma:</strong> <span id="modal-class"></span> - <strong>Nome:</strong> <span id="modal-name"></span></p>
@@ -62,16 +62,20 @@
                 <thead>
                   <tr>
                     <th>Disciplina</th>
-                    <th>Semestre</th>
+                    <th>Bimestre</th>
                     <th>Profici&ecirc;ncia</th>
                     <th>N&iacute;vel</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr><th rowspan="2">Portugu&ecirc;s</th><td>1&ordm; Sem</td><td id="port-score-1"></td><td id="port-level-1"></td></tr>
-                  <tr><td>2&ordm; Sem</td><td id="port-score-2"></td><td id="port-level-2"></td></tr>
-                  <tr><th rowspan="2">Matem&aacute;tica</th><td>1&ordm; Sem</td><td id="math-score-1"></td><td id="math-level-1"></td></tr>
-                  <tr><td>2&ordm; Sem</td><td id="math-score-2"></td><td id="math-level-2"></td></tr>
+                  <tr><th rowspan="4">Portugu&ecirc;s</th><td>1&ordm; Bim</td><td id="port-score-1"></td><td id="port-level-1"></td></tr>
+                  <tr><td>2&ordm; Bim</td><td id="port-score-2"></td><td id="port-level-2"></td></tr>
+                  <tr><td>3&ordm; Bim</td><td id="port-score-3"></td><td id="port-level-3"></td></tr>
+                  <tr><td>4&ordm; Bim</td><td id="port-score-4"></td><td id="port-level-4"></td></tr>
+                  <tr><th rowspan="4">Matem&aacute;tica</th><td>1&ordm; Bim</td><td id="math-score-1"></td><td id="math-level-1"></td></tr>
+                  <tr><td>2&ordm; Bim</td><td id="math-score-2"></td><td id="math-level-2"></td></tr>
+                  <tr><td>3&ordm; Bim</td><td id="math-score-3"></td><td id="math-level-3"></td></tr>
+                  <tr><td>4&ordm; Bim</td><td id="math-score-4"></td><td id="math-level-4"></td></tr>
                 </tbody>
               </table>
             </div>
@@ -104,6 +108,6 @@
 
     <div id="class-print-area" class="class-print-area" hidden></div>
 
-    <script src="/static/js/script.js?v=16"></script>
+    <script src="/static/js/script.js?v=17"></script>
   </body>
 </html>

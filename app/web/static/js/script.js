@@ -83,9 +83,9 @@ function normalizeText(value) {
 
 function clearReport() {
   ["port", "math"].forEach((subject) => {
-    for (let semester = 1; semester <= 2; semester += 1) {
-      document.querySelector(`#${subject}-score-${semester}`).textContent = "";
-      document.querySelector(`#${subject}-level-${semester}`).textContent = "";
+    for (let bimester = 1; bimester <= 4; bimester += 1) {
+      document.querySelector(`#${subject}-score-${bimester}`).textContent = "";
+      document.querySelector(`#${subject}-level-${bimester}`).textContent = "";
     }
   });
 }
@@ -102,14 +102,14 @@ function openReport(records) {
       : component.includes("portugues")
         ? "port"
         : "";
-    const semester = String(record.semestre || "").replace(/\D/g, "").slice(0, 1);
+    const bimester = String(record.bimestre || "").replace(/\D/g, "").slice(0, 1);
 
-    if (!subject || !["1", "2"].includes(semester)) {
+    if (!subject || !["1", "2", "3", "4"].includes(bimester)) {
       return;
     }
 
-    document.querySelector(`#${subject}-score-${semester}`).textContent = record.proficiencia ?? "";
-    document.querySelector(`#${subject}-level-${semester}`).textContent = record.nivel ?? "";
+    document.querySelector(`#${subject}-score-${bimester}`).textContent = record.proficiencia ?? "";
+    document.querySelector(`#${subject}-level-${bimester}`).textContent = record.nivel ?? "";
   });
 
   reportPreview.hidden = false;
@@ -354,10 +354,10 @@ function createClassFolder(schoolClass) {
   return item;
 }
 
-function reportValue(records, subjectName, semester, field) {
+function reportValue(records, subjectName, bimester, field) {
   const record = records.find((item) => {
     const component = normalizeText(item.componente);
-    return component.includes(subjectName) && Number(item.semestre) === semester;
+    return component.includes(subjectName) && Number(item.bimestre) === bimester;
   });
   return record?.[field] ?? "";
 }
@@ -374,7 +374,7 @@ function createMiniReport(report) {
   const testName = document.createElement("p");
   testName.innerHTML = "<strong>Nome da prova:</strong> Saberes e Aprendizagens da SME-SP";
   const period = document.createElement("p");
-  period.innerHTML = "<strong>Período:</strong> 1º e 2º Semestre de 2026";
+  period.innerHTML = "<strong>Período:</strong> 1º, 2º, 3º e 4º Bimestre de 2026";
   const student = document.createElement("p");
   const studentLabel = document.createElement("strong");
   studentLabel.textContent = `Turma: ${report.turma ?? ""} - Nome: `;
@@ -385,7 +385,7 @@ function createMiniReport(report) {
   table.className = "mini-report-table";
   const head = document.createElement("thead");
   const headRow = document.createElement("tr");
-  ["Disciplina", "Semestre", "Proficiência", "Nível"].forEach((text) => {
+  ["Disciplina", "Bimestre", "Proficiência", "Nível"].forEach((text) => {
     const cell = document.createElement("th");
     cell.textContent = text;
     headRow.append(cell);
@@ -398,21 +398,21 @@ function createMiniReport(report) {
     ["Português", "portugues"],
     ["Matemática", "matematica"],
   ].forEach(([labelText, subjectName]) => {
-    [1, 2].forEach((semester) => {
+    [1, 2, 3, 4].forEach((bimester) => {
       const row = document.createElement("tr");
-      if (semester === 1) {
+      if (bimester === 1) {
         const subject = document.createElement("th");
-        subject.rowSpan = 2;
+        subject.rowSpan = 4;
         subject.textContent = labelText;
         row.append(subject);
       }
-      const semesterCell = document.createElement("td");
-      semesterCell.textContent = `${semester}º Sem`;
+      const bimesterCell = document.createElement("td");
+      bimesterCell.textContent = `${bimester}º Bim`;
       const score = document.createElement("td");
-      score.textContent = reportValue(report.records || [], subjectName, semester, "proficiencia");
+      score.textContent = reportValue(report.records || [], subjectName, bimester, "proficiencia");
       const level = document.createElement("td");
-      level.textContent = reportValue(report.records || [], subjectName, semester, "nivel");
-      row.append(semesterCell, score, level);
+      level.textContent = reportValue(report.records || [], subjectName, bimester, "nivel");
+      row.append(bimesterCell, score, level);
       body.append(row);
     });
   });

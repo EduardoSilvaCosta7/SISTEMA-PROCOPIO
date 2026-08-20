@@ -194,62 +194,60 @@ class SupabaseResultsClient:
             list(enrollments.values()),
             "aluno_ra,ano_letivo",
         )
-        semesters = sorted({record["semestre"] for record in records})
-        for semester in semesters:
+        bimesters = sorted({record["bimestre"] for record in records})
+        for bimester in bimesters:
             spreadsheet_rows = await self._upsert(
                 "planilhas",
                 [
                     {
                         "nome_arquivo": filename,
                         "ano_letivo": school_year,
-                        "semestre": semester,
-                        "bimestre": None,
+                        "bimestre": bimester,
                         "importado_em": imported_at,
                     }
                 ],
-                "nome_arquivo,ano_letivo,semestre",
+                "nome_arquivo,ano_letivo,bimestre",
                 return_rows=True,
             )
             if not spreadsheet_rows:
                 raise DatabaseUnavailableError()
 
             spreadsheet_id = spreadsheet_rows[0]["id"]
-            semester_records = [
-                record for record in records if record["semestre"] == semester
+            bimester_records = [
+                record for record in records if record["bimestre"] == bimester
             ]
             results = [
                 {
                     "planilha_id": spreadsheet_id,
                     "aluno_ra": record["ra"],
                     "ano_letivo": school_year,
-                    "semestre": semester,
-                    "bimestre": None,
+                    "bimestre": bimester,
                     "componente": record["componente"],
                     "proficiencia": record["proficiencia"],
                     "nivel": record["nivel"],
                     "atualizado_em": imported_at,
                 }
-                for record in semester_records
+                for record in bimester_records
             ]
 
             await self._delete(
                 "resultados",
                 {
                     "ano_letivo": f"eq.{school_year}",
-                    "semestre": f"eq.{semester}",
+                    "bimestre": f"eq.{bimester}",
                 },
             )
             for start in range(0, len(results), 500):
                 await self._upsert(
                     "resultados",
                     results[start : start + 500],
-                    "aluno_ra,ano_letivo,semestre,componente",
+                    "aluno_ra,ano_letivo,bimestre,componente",
                 )
 
         return {
             "count": len(records),
             "students": len(students),
-            "semesters": semesters,
+            "bimesters": bimesters,
         }
 
     async def search_by_ra(self, ra: str) -> list[dict]:
@@ -276,11 +274,10 @@ class SupabaseResultsClient:
         results = await self._select(
             "resultados",
             {
-                "select": "ano_letivo,semestre,componente,proficiencia,nivel",
+                "select": "ano_letivo,bimestre,componente,proficiencia,nivel",
                 "aluno_ra": f"eq.{ra}",
                 "ano_letivo": f"eq.{enrollment['ano_letivo']}",
-                "semestre": "not.is.null",
-                "order": "semestre.asc,componente.asc",
+                "order": "bimestre.asc,componente.asc",
             },
         )
 
@@ -293,7 +290,7 @@ class SupabaseResultsClient:
                 "componente": result.get("componente", ""),
                 "proficiencia": result.get("proficiencia", ""),
                 "nivel": result.get("nivel", ""),
-                "semestre": result.get("semestre", ""),
+                "bimestre": result.get("bimestre", ""),
             }
             for result in results
         ]
@@ -378,11 +375,10 @@ class SupabaseResultsClient:
         results = await self._select(
             "resultados",
             {
-                "select": "aluno_ra,ano_letivo,semestre,componente,proficiencia,nivel",
+                "select": "aluno_ra,ano_letivo,bimestre,componente,proficiencia,nivel",
                 "aluno_ra": f"in.({ra_filter})",
                 "ano_letivo": f"eq.{school_year}",
-                "semestre": "not.is.null",
-                "order": "aluno_ra.asc,semestre.asc,componente.asc",
+                "order": "aluno_ra.asc,bimestre.asc,componente.asc",
             },
         )
 
@@ -400,7 +396,7 @@ class SupabaseResultsClient:
                     "componente": result.get("componente", ""),
                     "proficiencia": result.get("proficiencia", ""),
                     "nivel": result.get("nivel", ""),
-                    "semestre": result.get("semestre", ""),
+                    "bimestre": result.get("bimestre", ""),
                 }
             )
 

@@ -9,7 +9,6 @@ ALLOWED_EXTENSIONS = {".xlsx", ".xlsm"}
 MAX_RECORDS = 10_000
 
 REQUIRED_COLUMNS = {
-    "semestre": "semestre",
     "nomealuno": "nome_aluno",
     "anoescola": "ano_escolar",
     "turma": "turma",
@@ -53,11 +52,11 @@ def normalize_score(value: object) -> float | None:
         return None
 
 
-def normalize_semester(value: object) -> int:
-    match = re.search(r"[12]", str(value or ""))
+def normalize_bimester(value: object) -> int:
+    match = re.search(r"[1-4]", str(value or ""))
     if not match:
         raise SpreadsheetReadError(
-            "A coluna SEMESTRE deve informar 1º semestre ou 2º semestre."
+            "A coluna BIMESTRE deve informar um valor entre 1 e 4."
         )
     return int(match.group(0))
 
@@ -79,7 +78,10 @@ def read_spreadsheet(contents: bytes) -> list[dict]:
     columns_by_key = {
         normalize_column_name(header): index for index, header in enumerate(headers)
     }
+    period_key = "bimestre" if "bimestre" in columns_by_key else "semestre"
     missing = [key for key in REQUIRED_COLUMNS if key not in columns_by_key]
+    if period_key not in columns_by_key:
+        missing.append("bimestre")
     if missing:
         raise SpreadsheetReadError(
             f"Colunas obrigatórias ausentes: {', '.join(missing)}."
@@ -101,8 +103,8 @@ def read_spreadsheet(contents: bytes) -> list[dict]:
             output_name: str(cell_value(key) or "").strip()
             for key, output_name in REQUIRED_COLUMNS.items()
         }
-        record["semestre"] = normalize_semester(
-            cell_value("semestre")
+        record["bimestre"] = normalize_bimester(
+            cell_value(period_key)
         )
         record["ra"] = ra
         record["ano_escolar"] = normalize_school_grade(

@@ -814,7 +814,7 @@ button:disabled {
     min-width: 0;
     min-height: 0;
     overflow: hidden;
-    padding: 3mm;
+    padding: 2mm;
     border: 1px solid #111111;
     color: #111111;
     font-family: Arial, Helvetica, sans-serif;
@@ -823,36 +823,36 @@ button:disabled {
   }
 
   .mini-report p {
-    margin: 0 0 1.2mm;
-    font-size: 7.5pt;
-    line-height: 1.15;
+    margin: 0 0 0.6mm;
+    font-size: 6.5pt;
+    line-height: 1.1;
   }
 
   .mini-report .mini-school {
-    font-size: 9pt;
+    font-size: 8pt;
     font-style: italic;
     font-weight: 700;
   }
 
   .mini-report h2 {
     width: fit-content;
-    margin: 0 auto 2mm;
+    margin: 0 auto 1mm;
     border-bottom: 1px solid #111111;
-    font-size: 11pt;
+    font-size: 9.5pt;
   }
 
   .mini-report-table {
     width: 100%;
-    margin-top: 1.5mm;
+    margin-top: 0.8mm;
     border-collapse: collapse;
     table-layout: fixed;
-    font-size: 6.8pt;
+    font-size: 5.8pt;
   }
 
   .mini-report-table th,
   .mini-report-table td {
-    height: 5.5mm;
-    padding: 0.5mm 1mm;
+    height: 3.8mm;
+    padding: 0.2mm 0.6mm;
     overflow: hidden;
     border: 1px solid #111111;
     text-align: center;
