@@ -5,6 +5,11 @@ const statusMessage = document.querySelector("#status-message");
 const resultsWorkspace = document.querySelector("#results-workspace");
 const resultsSection = document.querySelector("#results-section");
 const studentResult = document.querySelector("#student-result");
+const classStudentsPanel = document.querySelector("#class-students-panel");
+const classStudentsResult = document.querySelector("#class-students-result");
+const selectedClassTitle = document.querySelector("#selected-class-title");
+const selectedClassCount = document.querySelector("#selected-class-count");
+const printSelectedClassButton = document.querySelector("#print-selected-class");
 const reportPreview = document.querySelector("#report-preview");
 const printReportButton = document.querySelector("#print-report");
 const modalClass = document.querySelector("#modal-class");
@@ -15,6 +20,7 @@ const selectedFileName = document.querySelector("#selected-file-name");
 const importButton = document.querySelector("#import-button");
 const importStatus = document.querySelector("#import-status");
 const classPrintArea = document.querySelector("#class-print-area");
+let selectedClass = "";
 
 function setStatus(message, isError = false) {
   statusMessage.textContent = message;
@@ -30,20 +36,23 @@ function setImportStatus(message, isError = false) {
 function hideResults(message, isError = false) {
   studentResult.innerHTML = "";
   resultsWorkspace.hidden = true;
-  resultsWorkspace.classList.remove("has-preview");
+  classStudentsPanel.hidden = true;
   reportPreview.hidden = true;
   setStatus(message, isError);
 }
 
 function renderStudents(students, accessStudent) {
   resultsWorkspace.hidden = false;
-  studentResult.innerHTML = "";
-  studentResult.className = "student-result";
+  classStudentsPanel.hidden = false;
+  selectedClassTitle.textContent = "Aluno localizado";
+  selectedClassCount.textContent = `${students.length} aluno(s) encontrado(s).`;
+  printSelectedClassButton.hidden = true;
+  classStudentsResult.innerHTML = "";
   setStatus("");
 
   students.forEach((student) => {
     const row = document.createElement("div");
-    row.className = "student-row";
+    row.className = "class-student-row";
 
     const identity = document.createElement("div");
     identity.className = "student-identity";
@@ -59,8 +68,11 @@ function renderStudents(students, accessStudent) {
     accessButton.textContent = "Acessar";
     accessButton.addEventListener("click", () => accessStudent(student, accessButton));
 
-    row.append(identity, accessButton);
-    studentResult.append(row);
+    const raCell = document.createElement("span");
+    raCell.className = "student-ra";
+    raCell.textContent = student.ra ?? "";
+    row.append(identity, raCell, accessButton);
+    classStudentsResult.append(row);
   });
 }
 
@@ -70,6 +82,62 @@ function renderRecords(records) {
     return;
   }
   renderStudents([records[0]], () => openReport(records));
+}
+
+function renderClassStudents(schoolClass, students) {
+  selectedClass = schoolClass;
+  classStudentsPanel.hidden = false;
+  selectedClassTitle.textContent = `Alunos da turma ${schoolClass}`;
+  selectedClassCount.textContent = `${students.length} aluno(s) encontrado(s).`;
+  printSelectedClassButton.hidden = false;
+  classStudentsResult.innerHTML = "";
+
+  students.forEach((student) => {
+    const row = document.createElement("div");
+    row.className = "class-student-row";
+
+    const identity = document.createElement("div");
+    identity.className = "student-identity";
+    const name = document.createElement("strong");
+    name.textContent = student.nome_aluno ?? "";
+    identity.append(name);
+
+    const raCell = document.createElement("span");
+    raCell.className = "student-ra";
+    raCell.textContent = student.ra ?? "";
+
+    const accessButton = document.createElement("button");
+    accessButton.type = "button";
+    accessButton.textContent = "Acessar";
+    accessButton.addEventListener("click", () => loadStudentReport(student, accessButton));
+    row.append(identity, raCell, accessButton);
+    classStudentsResult.append(row);
+  });
+
+  if (students.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "tree-empty";
+    empty.textContent = "Nenhum aluno encontrado nesta turma.";
+    classStudentsResult.append(empty);
+  }
+}
+
+async function loadClassStudents(schoolClass, button) {
+  button.disabled = true;
+  setStatus(`Carregando alunos da turma ${schoolClass}...`);
+  try {
+    const payload = await requestJson("/api/search-class", { turma: schoolClass });
+    renderClassStudents(schoolClass, payload.students || []);
+    document.querySelectorAll(".tree-class").forEach((item) => {
+      item.classList.remove("selected");
+    });
+    button.closest(".tree-class")?.classList.add("selected");
+    setStatus("");
+  } catch (error) {
+    setStatus(error.message, true);
+  } finally {
+    button.disabled = false;
+  }
 }
 
 function normalizeText(value) {
@@ -112,7 +180,12 @@ function openReport(records) {
 
   reportPreview.hidden = false;
   resultsWorkspace.hidden = false;
-  resultsWorkspace.classList.add("has-preview");
+  document.body.classList.add("report-open");
+}
+
+function closeReport() {
+  reportPreview.hidden = true;
+  document.body.classList.remove("report-open");
 }
 
 function normalizeRa(value) {
@@ -156,7 +229,7 @@ async function loadStudentReport(student, button) {
     if (records.length === 0) {
       throw new Error("Nenhum resultado encontrado para este aluno.");
     }
-    document.querySelectorAll(".student-row, .tree-student-row").forEach((row) => {
+    document.querySelectorAll(".student-row, .tree-student-row, .class-student-row").forEach((row) => {
       row.classList.remove("selected");
     });
     button.closest(".student-row, .tree-student-row")?.classList.add("selected");
@@ -193,8 +266,9 @@ async function searchByRa() {
 
 function renderClassTree(schoolYear, classes) {
   resultsWorkspace.hidden = false;
-  resultsWorkspace.classList.add("has-preview");
   reportPreview.hidden = true;
+  classStudentsPanel.hidden = true;
+  selectedClass = "";
   studentResult.innerHTML = "";
   studentResult.className = "student-result folder-tree";
 
@@ -268,6 +342,9 @@ function createClassFolder(schoolClass) {
   let loaded = false;
 
   button.addEventListener("click", async () => {
+    await loadClassStudents(schoolClass, button);
+    return;
+
     const expanded = button.getAttribute("aria-expanded") === "true";
     if (expanded) {
       button.setAttribute("aria-expanded", "false");
@@ -501,5 +578,21 @@ importForm.addEventListener("submit", async (event) => {
 });
 
 printReportButton.addEventListener("click", () => window.print());
+
+printSelectedClassButton.addEventListener("click", () => {
+  if (selectedClass) {
+    printWholeClass(selectedClass, printSelectedClassButton);
+  }
+});
+
+document.querySelectorAll("[data-close-report]").forEach((element) => {
+  element.addEventListener("click", closeReport);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !reportPreview.hidden) {
+    closeReport();
+  }
+});
 
 loadClassTree();

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sistema de Resultados</title>
-    <link rel="stylesheet" href="/static/css/styles.css?v=20">
+    <link rel="stylesheet" href="/static/css/styles.css?v=21">
   </head>
   <body>
     <div class="app-shell">
@@ -82,7 +82,29 @@
           <div id="student-result" class="student-result"></div>
         </section>
 
-        <aside id="report-preview" class="report-preview" aria-label="Preview do relatório" hidden>
+        <section id="class-students-panel" class="class-students-panel" aria-label="Alunos da turma" hidden>
+          <div class="class-students-header">
+            <div class="class-students-title">
+              <img src="/static/assets/students-icon.png" alt="">
+              <div>
+                <h2 id="selected-class-title">Alunos da turma</h2>
+                <p id="selected-class-count"></p>
+              </div>
+            </div>
+            <button id="print-selected-class" class="print-class-button" type="button" hidden>Imprimir turma</button>
+          </div>
+          <div class="students-table-head" aria-hidden="true">
+            <span>Nome do aluno</span>
+            <span>RA</span>
+            <span>Ações</span>
+          </div>
+          <div id="class-students-result" class="class-students-result"></div>
+        </section>
+
+        <aside id="report-preview" class="report-preview" role="dialog" aria-modal="true" aria-label="Boletim do aluno" hidden>
+          <div class="report-modal-backdrop" data-close-report></div>
+          <div class="report-modal-content">
+            <button class="close-report-button" type="button" data-close-report aria-label="Fechar boletim">&times;</button>
           <article class="report-sheet">
             <p class="report-school">EMEF Proc&oacute;pio Ferreira</p>
             <h2 id="report-title">Resultado de prova</h2>
@@ -120,6 +142,7 @@
           <div class="preview-actions">
             <button id="print-report" class="print-button" type="button">Imprimir PDF</button>
           </div>
+          </div>
         </aside>
       </div>
 
@@ -129,6 +152,6 @@
 
     <div id="class-print-area" class="class-print-area" hidden></div>
 
-    <script src="/static/js/script.js?v=20"></script>
+    <script src="/static/js/script.js?v=21"></script>
   </body>
 </html>
