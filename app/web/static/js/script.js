@@ -1,9 +1,6 @@
 const searchForm = document.querySelector("#search-form");
 const searchButton = document.querySelector("#search-button");
 const searchInput = document.querySelector("#ra-search");
-const searchLabel = document.querySelector("#search-label");
-const modeRaButton = document.querySelector("#mode-ra");
-const modeClassButton = document.querySelector("#mode-class");
 const statusMessage = document.querySelector("#status-message");
 const resultsWorkspace = document.querySelector("#results-workspace");
 const resultsSection = document.querySelector("#results-section");
@@ -14,10 +11,10 @@ const modalClass = document.querySelector("#modal-class");
 const modalName = document.querySelector("#modal-name");
 const importForm = document.querySelector("#import-form");
 const spreadsheetFile = document.querySelector("#spreadsheet-file");
+const selectedFileName = document.querySelector("#selected-file-name");
 const importButton = document.querySelector("#import-button");
 const importStatus = document.querySelector("#import-status");
 const classPrintArea = document.querySelector("#class-print-area");
-let searchMode = "ra";
 
 function setStatus(message, isError = false) {
   statusMessage.textContent = message;
@@ -26,6 +23,7 @@ function setStatus(message, isError = false) {
 
 function setImportStatus(message, isError = false) {
   importStatus.textContent = message;
+  importStatus.hidden = !message;
   importStatus.classList.toggle("error", isError);
 }
 
@@ -147,26 +145,6 @@ async function requestJson(url, body) {
     throw new Error(payload.detail || "Não foi possível realizar a consulta.");
   }
   return payload;
-}
-
-function setSearchMode(mode) {
-  searchMode = mode;
-  const isRa = mode === "ra";
-  modeRaButton.classList.toggle("active", isRa);
-  modeClassButton.classList.toggle("active", !isRa);
-  modeRaButton.setAttribute("aria-pressed", String(isRa));
-  modeClassButton.setAttribute("aria-pressed", String(!isRa));
-  searchForm.hidden = !isRa;
-  searchInput.value = "";
-  if (isRa) {
-    searchLabel.textContent = "RA do aluno";
-    searchInput.placeholder = "Digite o RA";
-    searchInput.inputMode = "numeric";
-    hideResults("Digite o RA do aluno para realizar a busca.");
-    searchInput.focus();
-  } else {
-    loadClassTree();
-  }
 }
 
 async function loadStudentReport(student, button) {
@@ -483,13 +461,9 @@ searchForm.addEventListener("submit", (event) => {
   searchByRa();
 });
 
-modeRaButton.addEventListener("click", () => setSearchMode("ra"));
-modeClassButton.addEventListener("click", () => setSearchMode("class"));
-
-searchInput.addEventListener("input", () => {
-  if (!resultsWorkspace.hidden) {
-    hideResults("Clique em Buscar para realizar a consulta.");
-  }
+spreadsheetFile.addEventListener("change", () => {
+  const file = spreadsheetFile.files[0];
+  selectedFileName.textContent = file ? file.name : "Formatos aceitos: .xlsx e .xlsm";
 });
 
 importForm.addEventListener("submit", async (event) => {
@@ -514,9 +488,11 @@ importForm.addEventListener("submit", async (event) => {
       throw new Error(payload.detail || "Não foi possível importar a planilha.");
     }
     spreadsheetFile.value = "";
+    selectedFileName.textContent = "Formatos aceitos: .xlsx e .xlsm";
     setImportStatus(
       `Importação concluída: ${payload.count} registros de ${payload.students} alunos.`,
     );
+    loadClassTree();
   } catch (error) {
     setImportStatus(error.message, true);
   } finally {
@@ -526,4 +502,4 @@ importForm.addEventListener("submit", async (event) => {
 
 printReportButton.addEventListener("click", () => window.print());
 
-setSearchMode("class");
+loadClassTree();
