@@ -303,13 +303,17 @@ button:disabled { cursor: wait; opacity: .7; }
 .tree-year > .tree-toggle { display: none; }
 .tree-class { margin-top: 9px; }
 .tree-class::before { display: none; }
-.tree-class-header { display: flex; min-height: 52px; align-items: center; gap: 10px; padding: 0 12px 0 4px; border-radius: 12px; background: #ffb315; }
-.tree-class-header .print-class-button { display: block; flex: 0 0 auto; min-height: 32px; padding: 0 14px; border: 0; background: var(--orange); color: #fff; font-size: 11px; }
+.tree-class-header { display: flex; min-height: 52px; align-items: center; flex-direction: row; gap: 10px; padding: 0 12px 0 4px; border-radius: 12px; background: #ffb315; }
+.tree-class-header .print-class-button { display: block; width: auto; flex: 0 0 auto; min-height: 32px; padding: 0 14px; border: 0; background: var(--orange); color: #fff; font-size: 11px; }
 .tree-class-header .print-class-button:hover { background: var(--orange-dark); }
 .tree-toggle { min-height: 52px; padding: 0 14px; border-radius: 12px; background: transparent; color: #fff; font-family: var(--font-heading); font-size: 15px; }
 .tree-toggle:hover, .tree-class.selected .tree-toggle { background: transparent; color: #fff; }
 .tree-toggle::after { margin-left: auto; content: "⌄"; font-size: 18px; }
+.tree-toggle::after { transition: transform .18s ease; }
+.tree-toggle[aria-expanded="true"]::after { transform: rotate(180deg); }
 .tree-chevron, .tree-folder-icon { display: none; }
+.tree-students { margin: 6px 4px 0; padding: 0; overflow: hidden; border: 0; border-radius: 8px; background: rgba(255, 255, 255, .72); }
+.tree-students .tree-student-row:last-child { border-bottom: 0; }
 .class-students-panel { border-radius: 15px; background: #fff; }
 .class-students-header { min-height: 62px; }
 

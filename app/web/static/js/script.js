@@ -370,15 +370,13 @@ function createClassFolder(schoolClass) {
   let loaded = false;
 
   button.addEventListener("click", async () => {
-    await loadClassStudents(schoolClass, button);
-    return;
-
     const expanded = button.getAttribute("aria-expanded") === "true";
     if (expanded) {
       button.setAttribute("aria-expanded", "false");
       chevron.textContent = "▸";
       folder.textContent = "📁";
       studentsContainer.hidden = true;
+      item.classList.remove("selected");
       return;
     }
 
@@ -386,6 +384,10 @@ function createClassFolder(schoolClass) {
     chevron.textContent = "▾";
     folder.textContent = "📂";
     studentsContainer.hidden = false;
+    document.querySelectorAll(".tree-class").forEach((classItem) => {
+      classItem.classList.remove("selected");
+    });
+    item.classList.add("selected");
     if (loaded) {
       return;
     }
