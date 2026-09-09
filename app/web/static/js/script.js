@@ -22,7 +22,6 @@ const modalClass = document.querySelector("#modal-class");
 const modalName = document.querySelector("#modal-name");
 const importForm = document.querySelector("#import-form");
 const spreadsheetFile = document.querySelector("#spreadsheet-file");
-const selectedFileName = document.querySelector("#selected-file-name");
 const importButton = document.querySelector("#import-button");
 const importStatus = document.querySelector("#import-status");
 const classPrintArea = document.querySelector("#class-print-area");
@@ -563,7 +562,6 @@ searchForm.addEventListener("submit", (event) => {
 
 spreadsheetFile.addEventListener("change", () => {
   const file = spreadsheetFile.files[0];
-  selectedFileName.textContent = file ? file.name : "Formatos aceitos: .xlsx e .xlsm";
   if (file) {
     importForm.requestSubmit();
   }
@@ -591,7 +589,6 @@ importForm.addEventListener("submit", async (event) => {
       throw new Error(payload.detail || "Não foi possível importar a planilha.");
     }
     spreadsheetFile.value = "";
-    selectedFileName.textContent = "Formatos aceitos: .xlsx e .xlsm";
     setImportStatus(
       `Importação concluída: ${payload.count} registros de ${payload.students} alunos.`,
     );

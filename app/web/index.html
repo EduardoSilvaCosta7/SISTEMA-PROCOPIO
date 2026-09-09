@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sistema de Resultados</title>
-    <link rel="stylesheet" href="/static/css/styles.css?v=27">
+    <link rel="stylesheet" href="/static/css/styles.css?v=30">
   </head>
   <body>
     <div class="app-shell">
@@ -48,7 +48,7 @@
           <form id="search-form" class="search-form">
             <label id="search-label" class="search-label" for="ra-search">RA do aluno</label>
             <div class="search-control">
-              <input id="ra-search" type="search" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="Digite o RA">
+              <input id="ra-search" type="search" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="Busque por RA">
               <button id="search-button" type="submit">Buscar</button>
             </div>
           </form>
@@ -70,26 +70,14 @@
           <p>Cada linha deve representar o resultado de um aluno em um componente curricular. Antes de enviar, confira se os nomes estão corretos, se não faltam colunas e se os dados começam logo abaixo dos títulos.</p>
           <img class="spreadsheet-example" src="/static/assets/spreadsheet-example.png" alt="Exemplo de organização da planilha">
         </section>
-      <section class="panel import-panel">
-        <div class="panel-heading">
-          <span class="section-number">2</span>
-          <div>
-            <h2>Importar planilha</h2>
-            <p>Envie os resultados para o banco de dados.</p>
-          </div>
-        </div>
-
+      <section class="upload-action-panel">
         <form id="import-form" class="import-form">
-          <div class="import-file-group">
-            <span class="upload-mark" aria-hidden="true">&#8593;</span>
-            <div>
-              <span class="field-label">Selecione a planilha Excel</span>
-              <span id="selected-file-name" class="field-help">Formatos aceitos: .xlsx e .xlsm</span>
-            </div>
-          </div>
-          <label class="choose-file-button" for="spreadsheet-file">Faça upload <span aria-hidden="true">&#8679;</span></label>
+          <label class="upload-main-button" for="spreadsheet-file">
+            <span>Fa&ccedil;a upload</span>
+            <span class="upload-button-icon" aria-hidden="true">&#8679;</span>
+          </label>
           <input id="spreadsheet-file" name="file" type="file" accept=".xlsx,.xlsm" required>
-          <button id="import-button" type="submit">Importar planilha</button>
+          <button id="import-button" class="hidden-submit" type="submit" tabindex="-1">Enviar</button>
         </form>
 
         <p id="import-status" class="status" role="status" hidden></p>
@@ -179,6 +167,6 @@
 
     <div id="class-print-area" class="class-print-area" hidden></div>
 
-    <script src="/static/js/script.js?v=27"></script>
+    <script src="/static/js/script.js?v=28"></script>
   </body>
 </html>
