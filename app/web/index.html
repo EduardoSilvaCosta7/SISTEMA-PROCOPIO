@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sistema de Resultados</title>
-    <link rel="stylesheet" href="/static/css/styles.css?v=23">
+    <link rel="stylesheet" href="/static/css/styles.css?v=27">
   </head>
   <body>
     <div class="app-shell">
@@ -20,6 +20,21 @@
         </header>
 
     <main class="app">
+      <section id="home-view" class="app-view home-view">
+        <div class="home-actions" aria-label="Ações principais">
+          <button id="show-upload" class="home-action" type="button">
+            <img src="/static/assets/upload-spreadsheet.png" alt="">
+            <span>Subir planilha</span>
+          </button>
+          <button id="show-reports" class="home-action" type="button">
+            <img src="/static/assets/view-reports.png" alt="">
+            <span>Ver boletins</span>
+          </button>
+        </div>
+      </section>
+
+      <section id="results-search-view" class="app-view" hidden>
+        <button class="home-back" type="button" data-show-home aria-label="Voltar ao início">&larr;</button>
       <section class="panel search-panel">
         <div class="search-content">
           <div class="panel-heading">
@@ -44,7 +59,17 @@
           <img src="/static/assets/search-icon.png" alt="">
         </div>
       </section>
+      </section>
 
+      <section id="upload-view" class="app-view" hidden>
+        <button class="home-back" type="button" data-show-home aria-label="Voltar ao início">&larr;</button>
+        <section class="upload-guide" aria-labelledby="upload-guide-title">
+          <h1 id="upload-guide-title">Regras para subir planilha</h1>
+          <h2>Como subir</h2>
+          <p>Organize a planilha com os títulos na primeira linha e uma informação por coluna. Ela deve conter: BIMESTRE, Código UE, Nome UE, Ano Escola, Turma, Aluno RA, Nome Aluno, Componente, Proficiência e Nível.</p>
+          <p>Cada linha deve representar o resultado de um aluno em um componente curricular. Antes de enviar, confira se os nomes estão corretos, se não faltam colunas e se os dados começam logo abaixo dos títulos.</p>
+          <img class="spreadsheet-example" src="/static/assets/spreadsheet-example.png" alt="Exemplo de organização da planilha">
+        </section>
       <section class="panel import-panel">
         <div class="panel-heading">
           <span class="section-number">2</span>
@@ -62,14 +87,16 @@
               <span id="selected-file-name" class="field-help">Formatos aceitos: .xlsx e .xlsm</span>
             </div>
           </div>
-          <label class="choose-file-button" for="spreadsheet-file">Escolher arquivo</label>
+          <label class="choose-file-button" for="spreadsheet-file">Faça upload <span aria-hidden="true">&#8679;</span></label>
           <input id="spreadsheet-file" name="file" type="file" accept=".xlsx,.xlsm" required>
           <button id="import-button" type="submit">Importar planilha</button>
         </form>
 
         <p id="import-status" class="status" role="status" hidden></p>
       </section>
+      </section>
 
+      <section id="results-list-view" class="app-view">
       <div id="results-workspace" class="results-workspace" hidden>
         <section id="results-section" class="results-panel" aria-label="Resultados da busca">
           <div class="results-header">
@@ -144,6 +171,7 @@
           </div>
         </aside>
       </div>
+      </section>
 
     </main>
       </div>
@@ -151,6 +179,6 @@
 
     <div id="class-print-area" class="class-print-area" hidden></div>
 
-    <script src="/static/js/script.js?v=21"></script>
+    <script src="/static/js/script.js?v=27"></script>
   </body>
 </html>

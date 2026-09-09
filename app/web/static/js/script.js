@@ -1,4 +1,10 @@
 const searchForm = document.querySelector("#search-form");
+const homeView = document.querySelector("#home-view");
+const uploadView = document.querySelector("#upload-view");
+const resultsSearchView = document.querySelector("#results-search-view");
+const resultsListView = document.querySelector("#results-list-view");
+const showUploadButton = document.querySelector("#show-upload");
+const showReportsButton = document.querySelector("#show-reports");
 const searchButton = document.querySelector("#search-button");
 const searchInput = document.querySelector("#ra-search");
 const statusMessage = document.querySelector("#status-message");
@@ -25,6 +31,23 @@ let selectedClass = "";
 function setStatus(message, isError = false) {
   statusMessage.textContent = message;
   statusMessage.classList.toggle("error", isError);
+}
+
+function showView(view) {
+  const isUpload = view === "upload";
+  homeView.hidden = false;
+  uploadView.hidden = !isUpload;
+  resultsSearchView.hidden = view !== "reports";
+  resultsListView.hidden = false;
+
+  if (view === "upload") {
+    closeReport();
+    uploadView.scrollIntoView({ behavior: "smooth", block: "start" });
+  } else if (view === "reports") {
+    resultsSearchView.scrollIntoView({ behavior: "smooth", block: "start" });
+  } else {
+    closeReport();
+  }
 }
 
 function setImportStatus(message, isError = false) {
@@ -541,6 +564,9 @@ searchForm.addEventListener("submit", (event) => {
 spreadsheetFile.addEventListener("change", () => {
   const file = spreadsheetFile.files[0];
   selectedFileName.textContent = file ? file.name : "Formatos aceitos: .xlsx e .xlsm";
+  if (file) {
+    importForm.requestSubmit();
+  }
 });
 
 importForm.addEventListener("submit", async (event) => {
@@ -578,6 +604,12 @@ importForm.addEventListener("submit", async (event) => {
 });
 
 printReportButton.addEventListener("click", () => window.print());
+
+showUploadButton.addEventListener("click", () => showView("upload"));
+showReportsButton.addEventListener("click", () => showView("reports"));
+document.querySelectorAll("[data-show-home]").forEach((button) => {
+  button.addEventListener("click", () => showView("home"));
+});
 
 printSelectedClassButton.addEventListener("click", () => {
   if (selectedClass) {
