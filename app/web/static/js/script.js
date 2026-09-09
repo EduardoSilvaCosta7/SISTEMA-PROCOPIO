@@ -268,17 +268,25 @@ async function loadStudentReport(student, button) {
 async function searchByRa() {
   const ra = normalizeRa(searchInput.value);
   if (!ra) {
-    hideResults("Digite o RA do aluno para realizar a busca.");
+    searchInput.focus();
+    setStatus("Digite o RA do aluno para realizar a busca.", true);
     return;
   }
 
   searchButton.disabled = true;
-  hideResults("Buscando aluno...");
+  classStudentsPanel.hidden = true;
+  reportPreview.hidden = true;
+  setStatus("Buscando aluno...");
   try {
     const payload = await requestJson("/api/search", { ra });
-    renderRecords(payload.records || []);
+    const records = payload.records || [];
+    if (records.length === 0) {
+      setStatus("Nenhum registro encontrado para este RA.", true);
+      return;
+    }
+    renderRecords(records);
   } catch (error) {
-    hideResults(error.message, true);
+    setStatus(error.message, true);
   } finally {
     searchButton.disabled = false;
   }

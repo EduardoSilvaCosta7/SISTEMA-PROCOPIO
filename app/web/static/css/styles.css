@@ -286,16 +286,17 @@ button:disabled { cursor: wait; opacity: .7; }
 .results-search-view input[type="search"] { min-height: 46px; border-color: var(--orange); background: transparent; font-size: 14px; }
 .results-workspace { grid-template-columns: 1fr; margin: 0; }
 .results-workspace:has(.class-students-panel:not([hidden])) { grid-template-columns: minmax(270px, .35fr) minmax(0, 1fr); }
-.results-panel { max-height: 500px; border-radius: 15px; background: #ffe6b5; }
+.results-panel { max-height: 500px; padding-top: 18px; border-radius: 15px; background: #ffe6b5; }
 .results-search-view:not([hidden]) ~ .results-list-view .results-panel { border-radius: 0 0 15px 15px; }
 .results-header { min-height: 58px; padding: 12px 18px; border-bottom: 0; }
 .results-header h2 { font-size: 20px; }
-.class-search-area { padding: 0 18px 8px; }
+.class-search-area { padding: 0 18px 11px; }
 .class-search-area .search-form { display: block; }
 .class-search-area .search-label { display: none; }
-.class-search-area .search-control { display: grid; grid-template-columns: minmax(0, 1fr) 128px; gap: 10px; }
-.class-search-area input[type="search"] { min-height: 48px; border-color: #d7dee0; background: #fff; font-size: 14px; }
-.class-search-area .search-control button { display: block; min-height: 48px; }
+.class-search-area .search-control { display: block; }
+.class-search-area input[type="search"] { width: 143px; min-height: 36px; padding: 7px 15px; border-color: var(--orange); border-radius: 5px; background: transparent; color: var(--orange); font-family: var(--font-heading); font-size: 13px; font-weight: 800; }
+.class-search-area input[type="search"]::placeholder { color: var(--orange); opacity: 1; }
+.class-search-area .search-control button { position: absolute; width: 1px; height: 1px; min-height: 0; padding: 0; overflow: hidden; border: 0; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 .class-search-area .status { margin: 8px 0 0; background: rgba(255, 255, 255, .55); }
 .folder-tree { padding: 7px 18px 18px; }
 .tree-children { margin: 0; padding: 0; border: 0; }
