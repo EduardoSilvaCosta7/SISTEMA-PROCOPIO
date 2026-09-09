@@ -290,6 +290,13 @@ button:disabled { cursor: wait; opacity: .7; }
 .results-search-view:not([hidden]) ~ .results-list-view .results-panel { border-radius: 0 0 15px 15px; }
 .results-header { min-height: 58px; padding: 12px 18px; border-bottom: 0; }
 .results-header h2 { font-size: 20px; }
+.class-search-area { padding: 0 18px 8px; }
+.class-search-area .search-form { display: block; }
+.class-search-area .search-label { display: none; }
+.class-search-area .search-control { display: grid; grid-template-columns: minmax(0, 1fr) 128px; gap: 10px; }
+.class-search-area input[type="search"] { min-height: 48px; border-color: #d7dee0; background: #fff; font-size: 14px; }
+.class-search-area .search-control button { display: block; min-height: 48px; }
+.class-search-area .status { margin: 8px 0 0; background: rgba(255, 255, 255, .55); }
 .folder-tree { padding: 7px 18px 18px; }
 .tree-children { margin: 0; padding: 0; border: 0; }
 .tree-year > .tree-toggle { display: none; }
@@ -314,6 +321,7 @@ button:disabled { cursor: wait; opacity: .7; }
   .upload-guide { padding: 22px 20px; }
   .upload-view .import-form { grid-template-columns: 1fr; }
   .results-workspace:has(.class-students-panel:not([hidden])) { grid-template-columns: 1fr; }
+  .class-search-area .search-control { grid-template-columns: minmax(0, 1fr) 100px; }
 }
 
 @page { size: A4 landscape; margin: 10mm; }

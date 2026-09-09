@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sistema de Resultados</title>
-    <link rel="stylesheet" href="/static/css/styles.css?v=30">
+    <link rel="stylesheet" href="/static/css/styles.css?v=31">
   </head>
   <body>
     <div class="app-shell">
@@ -31,34 +31,6 @@
             <span>Ver boletins</span>
           </button>
         </div>
-      </section>
-
-      <section id="results-search-view" class="app-view" hidden>
-        <button class="home-back" type="button" data-show-home aria-label="Voltar ao início">&larr;</button>
-      <section class="panel search-panel">
-        <div class="search-content">
-          <div class="panel-heading">
-            <span class="section-number search-number">1</span>
-            <div>
-              <h1>Consultar aluno</h1>
-              <p>Localize um aluno pelo RA.</p>
-            </div>
-          </div>
-
-          <form id="search-form" class="search-form">
-            <label id="search-label" class="search-label" for="ra-search">RA do aluno</label>
-            <div class="search-control">
-              <input id="ra-search" type="search" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="Busque por RA">
-              <button id="search-button" type="submit">Buscar</button>
-            </div>
-          </form>
-
-          <p id="status-message" class="status" role="status">Carregando pastas de turmas...</p>
-        </div>
-        <div class="search-illustration" aria-hidden="true">
-          <img src="/static/assets/search-icon.png" alt="">
-        </div>
-      </section>
       </section>
 
       <section id="upload-view" class="app-view" hidden>
@@ -92,6 +64,16 @@
               <img src="/static/assets/folder-icon.png" alt="">
               <h2>Turmas</h2>
             </div>
+          </div>
+          <div class="class-search-area">
+            <form id="search-form" class="search-form">
+              <label class="search-label" for="ra-search">RA do aluno</label>
+              <div class="search-control">
+                <input id="ra-search" type="search" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="Digite o RA">
+                <button id="search-button" type="submit">Buscar</button>
+              </div>
+            </form>
+            <p id="status-message" class="status" role="status">Carregando pastas de turmas...</p>
           </div>
           <div id="student-result" class="student-result"></div>
         </section>
@@ -167,6 +149,6 @@
 
     <div id="class-print-area" class="class-print-area" hidden></div>
 
-    <script src="/static/js/script.js?v=28"></script>
+    <script src="/static/js/script.js?v=29"></script>
   </body>
 </html>
