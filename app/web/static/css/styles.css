@@ -6,13 +6,13 @@
   --font-heading: "Nunito", "Segoe UI", Arial, Helvetica, sans-serif;
   --font-interface: "Inter", "Segoe UI", Arial, Helvetica, sans-serif;
   color: #18334e;
-  background: #fff9ee;
+  background: #f4f4f2;
   --ink: #17324d;
   --teal: #0d8b84;
   --orange: #d95016;
   --orange-dark: #b93e0e;
   --gold: #f5ac22;
-  --cream: #fff9ee;
+  --cream: #f4f4f2;
   --paper: #ffffff;
   --line: #e8e1d5;
   --muted: #637282;
@@ -24,7 +24,7 @@
 body {
   min-height: 100vh;
   margin: 0;
-  background: #fffaf1;
+  background: #f4f4f2;
 }
 
 button, input { font: inherit; }
@@ -37,7 +37,7 @@ button { cursor: pointer; }
   position: relative;
   min-height: 170px;
   border-top: 3px solid var(--orange);
-  background: #fffaf1;
+  background: #f4f4f2;
 }
 
 .topbar-content {
@@ -340,16 +340,67 @@ button:disabled { cursor: wait; opacity: .7; }
 .class-students-panel { border-radius: 15px; background: #fff; }
 .class-students-header { min-height: 62px; }
 
+/* Escala visual ampliada. */
+.topbar, .topbar-content { min-height: 92px; }
+.topbar-content, .app { width: min(1040px, calc(100% - 56px)); }
+.topbar-logo { width: 190px; max-height: 62px; }
+.year-badge { min-width: 74px; padding: 10px 12px; font-size: 9px; }
+.year-badge strong { font-size: 16px; }
+.app { padding: 56px 0 88px; }
+.home-view { min-height: 250px; padding-top: 24px; }
+.home-actions { width: 340px; gap: 12px; padding: 15px; border-radius: 15px; }
+.home-action { min-height: 154px; padding: 16px 10px; font-size: 15px; }
+.home-action img { width: 72px; height: 72px; }
+.upload-guide { padding: 36px 40px; }
+.upload-guide h1 { font-size: 25px; }
+.upload-guide h2 { margin-top: 24px; font-size: 20px; }
+.upload-guide p { margin-top: 12px; font-size: 15px; line-height: 1.55; }
+.spreadsheet-example { width: min(100%, 760px); margin-top: 22px; }
+.upload-action-panel { width: min(100%, 430px); margin-top: 24px; }
+.upload-action-panel .upload-main-button { min-height: 66px; padding: 9px 11px 9px 24px; font-size: 17px; }
+.upload-button-icon { width: 44px; height: 44px; flex-basis: 44px; }
+.upload-button-icon svg { width: 25px; height: 25px; }
+.results-panel { max-height: 640px; padding-top: 24px; }
+.class-search-area { padding: 0 24px 14px; }
+.class-search-area input[type="search"] { width: 230px; min-height: 49px; padding-left: 46px; background-position-x: 15px; background-size: 21px 21px; font-size: 15px; }
+.folder-tree { padding: 9px 24px 24px; }
+.tree-class { margin-top: 12px; }
+.tree-class-header { min-height: 62px; padding-right: 14px; border-radius: 13px; }
+.tree-toggle { min-height: 62px; padding: 0 17px; font-size: 18px; }
+.tree-toggle::after { width: 21px; height: 21px; flex-basis: 21px; background-size: 21px 21px; }
+.tree-class-header .print-class-button { min-height: 38px; padding: 0 17px; font-size: 13px; }
+.tree-student-row { min-height: 66px; padding: 11px 14px; }
+.student-identity strong { font-size: 16px; }
+.student-identity span, .student-ra { font-size: 14px; }
+.tree-student-row button, .student-row button { min-height: 36px; padding: 0 15px; font-size: 13px; }
+.class-students-header { min-height: 78px; padding: 17px 24px; }
+.class-students-title img { width: 45px; height: 40px; }
+.class-students-title h2 { font-size: 24px; }
+.class-students-title p { font-size: 15px; }
+.students-table-head, .class-student-row { grid-template-columns: minmax(0, 1fr) 160px 126px; }
+.students-table-head { min-height: 48px; font-size: 14px; }
+.class-student-row { min-height: 64px; }
+.class-student-row button { min-height: 40px; font-size: 14px; }
+.status { font-size: 15px; }
+.report-school { font-size: 20px; }
+.report-sheet > h2 { font-size: 29px; }
+.report-info, .student-line { font-size: 16px; }
+.report-table { font-size: 14px; }
+.report-table th, .report-table td { height: 34px; padding: 6px 7px; }
+.print-button { min-height: 58px; font-size: 16px; }
+
 @media (max-width: 700px) {
-  .topbar, .topbar-content { min-height: 66px; }
+  .topbar, .topbar-content { min-height: 78px; }
   .topbar-content, .app { width: min(100% - 28px, 840px); }
-  .topbar-logo { width: 132px; max-height: 42px; }
-  .app { padding-top: 38px; }
-  .home-view { min-height: 260px; padding-top: 22px; }
-  .upload-guide { padding: 22px 20px; }
+  .topbar-logo { width: 155px; max-height: 50px; }
+  .app { padding-top: 44px; }
+  .home-view { min-height: 300px; padding-top: 24px; }
+  .home-actions { width: min(340px, 100%); }
+  .upload-guide { padding: 27px 23px; }
   .upload-view .import-form { grid-template-columns: 1fr; }
   .results-workspace:has(.class-students-panel:not([hidden])) { grid-template-columns: 1fr; }
-  .class-search-area .search-control { grid-template-columns: minmax(0, 1fr) 100px; }
+  .class-search-area input[type="search"] { width: min(230px, 100%); }
+  .students-table-head, .class-student-row { grid-template-columns: minmax(0, 1fr) 82px 92px; column-gap: 8px; }
 }
 
 @page { size: A4 landscape; margin: 10mm; }
