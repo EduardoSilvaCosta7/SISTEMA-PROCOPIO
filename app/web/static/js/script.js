@@ -35,10 +35,11 @@ function showView(view) {
   const isUpload = view === "upload";
   homeView.hidden = false;
   uploadView.hidden = !isUpload;
-  resultsListView.hidden = false;
+  resultsListView.hidden = isUpload;
 
   if (view === "upload") {
     closeReport();
+    classStudentsPanel.hidden = true;
     uploadView.scrollIntoView({ behavior: "smooth", block: "start" });
   } else if (view === "reports") {
     resultsListView.scrollIntoView({ behavior: "smooth", block: "start" });
