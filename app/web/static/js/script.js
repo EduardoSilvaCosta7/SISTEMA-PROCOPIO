@@ -40,9 +40,6 @@ function showView(view) {
   if (view === "upload") {
     closeReport();
     classStudentsPanel.hidden = true;
-    uploadView.scrollIntoView({ behavior: "smooth", block: "start" });
-  } else if (view === "reports") {
-    resultsListView.scrollIntoView({ behavior: "smooth", block: "start" });
   } else {
     closeReport();
   }
@@ -256,9 +253,6 @@ async function loadStudentReport(student, button) {
     button.closest(".student-row, .tree-student-row")?.classList.add("selected");
     setStatus("");
     openReport(records);
-    if (window.matchMedia("(max-width: 960px)").matches) {
-      reportPreview.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
   } catch (error) {
     setStatus(error.message, true);
   } finally {

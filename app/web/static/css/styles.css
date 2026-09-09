@@ -21,6 +21,11 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
 body {
   min-height: 100vh;
   margin: 0;
