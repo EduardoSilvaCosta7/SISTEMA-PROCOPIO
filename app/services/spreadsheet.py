@@ -8,6 +8,7 @@ from openpyxl import load_workbook
 ALLOWED_EXTENSIONS = {".xlsx", ".xlsm"}
 MAX_RECORDS = 10_000
 
+# Nomes das colunas que a planilha precisa ter na primeira linha.
 REQUIRED_COLUMNS = {
     "nomealuno": "nome_aluno",
     "anoescola": "ano_escolar",
@@ -75,6 +76,7 @@ def read_spreadsheet(contents: bytes) -> list[dict]:
     except Exception as exc:
         raise SpreadsheetReadError("Não foi possível ler a planilha.") from exc
 
+    # Guarda a posicao de cada coluna para facilitar a leitura das linhas.
     columns_by_key = {
         normalize_column_name(header): index for index, header in enumerate(headers)
     }

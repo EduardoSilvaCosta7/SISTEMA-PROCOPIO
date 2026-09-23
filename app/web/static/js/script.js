@@ -8,13 +8,11 @@ const searchButton = document.querySelector("#search-button");
 const searchInput = document.querySelector("#ra-search");
 const statusMessage = document.querySelector("#status-message");
 const resultsWorkspace = document.querySelector("#results-workspace");
-const resultsSection = document.querySelector("#results-section");
 const studentResult = document.querySelector("#student-result");
 const classStudentsPanel = document.querySelector("#class-students-panel");
 const classStudentsResult = document.querySelector("#class-students-result");
 const selectedClassTitle = document.querySelector("#selected-class-title");
 const selectedClassCount = document.querySelector("#selected-class-count");
-const printSelectedClassButton = document.querySelector("#print-selected-class");
 const reportPreview = document.querySelector("#report-preview");
 const printReportButton = document.querySelector("#print-report");
 const modalClass = document.querySelector("#modal-class");
@@ -25,22 +23,22 @@ const spreadsheetFile = document.querySelector("#spreadsheet-file");
 const importButton = document.querySelector("#import-button");
 const importStatus = document.querySelector("#import-status");
 const classPrintArea = document.querySelector("#class-print-area");
-let selectedClass = "";
 let availableClasses = [];
-let selectedSchool = {
-  id: "procopio",
-  name: "EMEF Procópio Ferreira",
-  classes: null,
-};
 
+// Esta lista controla as escolas mostradas na tela.
 const schools = [
-  selectedSchool,
+  {
+    id: "procopio",
+    name: "EMEF Procópio Ferreira",
+    classes: null,
+  },
   {
     id: "escola-exemplo",
     name: "EMEF Escola Exemplo",
     classes: ["4A"],
   },
 ];
+let selectedSchool = schools[0];
 
 function setStatus(message, isError = false) {
   statusMessage.textContent = message;
@@ -52,12 +50,9 @@ function showView(view) {
   homeView.hidden = false;
   uploadView.hidden = !isUpload;
   resultsListView.hidden = isUpload;
-
-  if (view === "upload") {
-    closeReport();
+  closeReport();
+  if (isUpload) {
     classStudentsPanel.hidden = true;
-  } else {
-    closeReport();
   }
 }
 
@@ -80,7 +75,6 @@ function renderStudents(students, accessStudent) {
   classStudentsPanel.hidden = false;
   selectedClassTitle.textContent = "Aluno localizado";
   selectedClassCount.textContent = `${students.length} aluno(s) encontrado(s).`;
-  printSelectedClassButton.hidden = true;
   classStudentsResult.innerHTML = "";
   setStatus("");
 
@@ -118,62 +112,6 @@ function renderRecords(records) {
   renderStudents([records[0]], () => openReport(records));
 }
 
-function renderClassStudents(schoolClass, students) {
-  selectedClass = schoolClass;
-  classStudentsPanel.hidden = false;
-  selectedClassTitle.textContent = `Alunos da turma ${schoolClass}`;
-  selectedClassCount.textContent = `${students.length} aluno(s) encontrado(s).`;
-  printSelectedClassButton.hidden = false;
-  classStudentsResult.innerHTML = "";
-
-  students.forEach((student) => {
-    const row = document.createElement("div");
-    row.className = "class-student-row";
-
-    const identity = document.createElement("div");
-    identity.className = "student-identity";
-    const name = document.createElement("strong");
-    name.textContent = student.nome_aluno ?? "";
-    identity.append(name);
-
-    const raCell = document.createElement("span");
-    raCell.className = "student-ra";
-    raCell.textContent = student.ra ?? "";
-
-    const accessButton = document.createElement("button");
-    accessButton.type = "button";
-    accessButton.textContent = "Acessar";
-    accessButton.addEventListener("click", () => loadStudentReport(student, accessButton));
-    row.append(identity, raCell, accessButton);
-    classStudentsResult.append(row);
-  });
-
-  if (students.length === 0) {
-    const empty = document.createElement("p");
-    empty.className = "tree-empty";
-    empty.textContent = "Nenhum aluno encontrado nesta turma.";
-    classStudentsResult.append(empty);
-  }
-}
-
-async function loadClassStudents(schoolClass, button) {
-  button.disabled = true;
-  setStatus(`Carregando alunos da turma ${schoolClass}...`);
-  try {
-    const payload = await requestJson("/api/search-class", { turma: schoolClass });
-    renderClassStudents(schoolClass, payload.students || []);
-    document.querySelectorAll(".tree-class").forEach((item) => {
-      item.classList.remove("selected");
-    });
-    button.closest(".tree-class")?.classList.add("selected");
-    setStatus("");
-  } catch (error) {
-    setStatus(error.message, true);
-  } finally {
-    button.disabled = false;
-  }
-}
-
 function normalizeText(value) {
   return String(value ?? "")
     .normalize("NFD")
@@ -196,6 +134,7 @@ function openReport(records) {
   modalName.textContent = records[0]?.nome_aluno ?? "";
   modalClass.textContent = records[0]?.turma ?? "";
 
+  // Cada linha da planilha representa um componente e um bimestre.
   records.forEach((record) => {
     const component = normalizeText(record.componente);
     const subject = component.includes("matematica")
@@ -243,6 +182,7 @@ async function readApiResponse(response) {
 }
 
 async function requestJson(url, body) {
+  // A tela fala somente com o FastAPI; a chave do Supabase nunca vai ao navegador.
   const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -304,54 +244,10 @@ async function searchByRa() {
   }
 }
 
-function renderClassTree(schoolYear, classes) {
-  resultsWorkspace.hidden = false;
-  reportPreview.hidden = true;
-  classStudentsPanel.hidden = true;
-  selectedClass = "";
-  studentResult.innerHTML = "";
-  studentResult.className = "student-result folder-tree";
-
-  const yearItem = document.createElement("div");
-  yearItem.className = "tree-item tree-year";
-  const yearButton = document.createElement("button");
-  yearButton.className = "tree-toggle";
-  yearButton.type = "button";
-  yearButton.setAttribute("aria-expanded", "true");
-
-  const yearChevron = document.createElement("span");
-  yearChevron.className = "tree-chevron";
-  yearChevron.textContent = "▾";
-  const yearFolder = document.createElement("span");
-  yearFolder.className = "tree-folder-icon";
-  yearFolder.textContent = "📂";
-  const yearLabel = document.createElement("strong");
-  yearLabel.textContent = String(schoolYear);
-  yearButton.append(yearChevron, yearFolder, yearLabel);
-
-  const classesContainer = document.createElement("div");
-  classesContainer.className = "tree-children";
-  classes.forEach((schoolClass) => {
-    classesContainer.append(createClassFolder(schoolClass));
-  });
-
-  yearButton.addEventListener("click", () => {
-    const expanded = yearButton.getAttribute("aria-expanded") === "true";
-    yearButton.setAttribute("aria-expanded", String(!expanded));
-    yearChevron.textContent = expanded ? "▸" : "▾";
-    yearFolder.textContent = expanded ? "📁" : "📂";
-    classesContainer.hidden = expanded;
-  });
-
-  yearItem.append(yearButton, classesContainer);
-  studentResult.append(yearItem);
-}
-
 function renderSchoolTree(schoolYear, classes) {
   resultsWorkspace.hidden = false;
   reportPreview.hidden = true;
   classStudentsPanel.hidden = true;
-  selectedClass = "";
   availableClasses = classes;
   studentResult.innerHTML = "";
   studentResult.className = "student-result folder-tree school-tree";
@@ -391,6 +287,7 @@ function renderSchoolTree(schoolYear, classes) {
 
       if (expanded) return;
 
+      // A escola escolhida tambem define o cabecalho do boletim.
       selectedSchool = school;
       reportSchoolName.textContent = school.name;
       schoolItem.classList.add("selected");
@@ -621,6 +518,7 @@ async function printWholeClass(schoolClass, button) {
       },
       { once: true },
     );
+    // O navegador abre a impressao; nele o usuario pode salvar em PDF.
     window.print();
   } catch (error) {
     setStatus(error.message, true);
@@ -665,6 +563,7 @@ importForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  // Arquivos precisam ser enviados como FormData, nao como JSON.
   const formData = new FormData();
   formData.append("file", file);
   importButton.disabled = true;
@@ -696,12 +595,6 @@ showUploadButton.addEventListener("click", () => showView("upload"));
 showReportsButton.addEventListener("click", () => showView("reports"));
 document.querySelectorAll("[data-show-home]").forEach((button) => {
   button.addEventListener("click", () => showView("home"));
-});
-
-printSelectedClassButton.addEventListener("click", () => {
-  if (selectedClass) {
-    printWholeClass(selectedClass, printSelectedClassButton);
-  }
 });
 
 document.querySelectorAll("[data-close-report]").forEach((element) => {

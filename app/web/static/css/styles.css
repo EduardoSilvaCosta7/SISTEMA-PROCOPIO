@@ -471,7 +471,7 @@ button:disabled { cursor: wait; opacity: .7; }
 @page { size: A4 landscape; margin: 10mm; }
 @media print {
   body { background: #fff; }
-  body > .app-shell > .page-content > .topbar, .app > :not(.results-workspace), .results-panel, .class-students-panel, .preview-actions { display: none !important; }
+  body > .app-shell > .topbar, .app > :not(.results-workspace), .results-panel, .class-students-panel, .preview-actions { display: none !important; }
   .app-shell, .page-content, .app, .results-workspace, .report-preview { display: block !important; width: 100%; max-width: none; margin: 0; border: 0; box-shadow: none; }
   .report-preview { position: static !important; padding: 0 !important; background: transparent !important; }
   .report-modal-backdrop, .close-report-button { display: none !important; }

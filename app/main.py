@@ -21,8 +21,10 @@ from app.services.spreadsheet import (
 
 APP_DIR = Path(__file__).resolve().parent
 WEB_DIR = APP_DIR / "web"
+# Limite menor para funcionar dentro das restricoes de upload da Vercel.
 MAX_UPLOAD_SIZE = 4 * 1024 * 1024
 
+# Cria a aplicacao que recebe as requisicoes do frontend.
 app = FastAPI(
     title="Sistema de Resultados",
     docs_url=None,
@@ -32,6 +34,7 @@ app = FastAPI(
 
 
 class StudentSearch(BaseModel):
+    # Modelo usado quando a busca e feita pelo RA.
     ra: str
 
     @field_validator("ra")
@@ -44,6 +47,7 @@ class StudentSearch(BaseModel):
 
 
 class ClassSearch(BaseModel):
+    # Modelo usado pelas rotas que trabalham com uma turma.
     turma: str
 
     @field_validator("turma")
@@ -57,6 +61,7 @@ class ClassSearch(BaseModel):
 
 @app.middleware("http")
 async def add_security_headers(request, call_next):
+    # Cabecalhos simples para evitar que o navegador interprete conteudo de forma insegura.
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
@@ -68,11 +73,13 @@ async def add_security_headers(request, call_next):
 
 @app.get("/", include_in_schema=False)
 def index() -> FileResponse:
+    # Entrega a pagina principal do sistema.
     return FileResponse(WEB_DIR / "index.html")
 
 
 @app.post("/api/search")
 async def search_student(search: StudentSearch) -> dict:
+    # Busca todos os resultados do aluno informado pelo RA.
     try:
         records = await SupabaseResultsClient.from_environment().search_by_ra(search.ra)
     except DatabaseConfigurationError as exc:
@@ -98,6 +105,7 @@ async def search_student(search: StudentSearch) -> dict:
 
 @app.post("/api/search-class")
 async def search_class(search: ClassSearch) -> dict:
+    # Lista os alunos de uma turma para preencher a tela.
     try:
         school_year = int(os.getenv("SCHOOL_YEAR", "2026"))
         students = await SupabaseResultsClient.from_environment().search_by_class(
@@ -127,6 +135,7 @@ async def search_class(search: ClassSearch) -> dict:
 
 @app.post("/api/classes")
 async def list_classes() -> dict:
+    # Retorna somente os nomes das turmas do ano letivo atual.
     try:
         school_year = int(os.getenv("SCHOOL_YEAR", "2026"))
         classes = await SupabaseResultsClient.from_environment().list_classes(
@@ -155,6 +164,7 @@ async def list_classes() -> dict:
 
 @app.post("/api/reports-class")
 async def reports_class(search: ClassSearch) -> dict:
+    # Reune os dados de uma turma inteira antes da impressao dos boletins.
     try:
         school_year = int(os.getenv("SCHOOL_YEAR", "2026"))
         reports = await SupabaseResultsClient.from_environment().reports_by_class(
@@ -186,6 +196,7 @@ async def reports_class(search: ClassSearch) -> dict:
 async def import_spreadsheet(
     file: UploadFile = File(...),
 ) -> dict:
+    # Confere o arquivo, le a planilha e manda os registros para o Supabase.
     filename = Path(file.filename or "").name
     if Path(filename).suffix.lower() not in ALLOWED_EXTENSIONS:
         raise HTTPException(
@@ -193,6 +204,7 @@ async def import_spreadsheet(
             detail="Envie uma planilha .xlsx ou .xlsm.",
         )
 
+    # Le um byte a mais para saber se o arquivo ultrapassou o limite.
     contents = await file.read(MAX_UPLOAD_SIZE + 1)
     if len(contents) > MAX_UPLOAD_SIZE:
         raise HTTPException(
@@ -203,6 +215,7 @@ async def import_spreadsheet(
         raise HTTPException(status_code=400, detail="O arquivo Excel é inválido.")
 
     try:
+        # A funcao devolve apenas as colunas que o sistema precisa guardar.
         records = read_spreadsheet(contents)
         school_year = int(os.getenv("SCHOOL_YEAR", "2026"))
         result = await SupabaseResultsClient.from_environment().import_records(
@@ -230,4 +243,5 @@ async def import_spreadsheet(
     return result
 
 
+# Disponibiliza CSS, JavaScript e imagens para o navegador.
 app.mount("/static", StaticFiles(directory=WEB_DIR / "static"), name="static")
