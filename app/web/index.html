@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sistema de Resultados</title>
-    <link rel="stylesheet" href="/static/css/styles.css?v=46">
+    <link rel="stylesheet" href="/static/css/styles.css?v=48">
   </head>
   <body>
     <div class="app-shell page-content">
@@ -101,16 +101,27 @@
           <div class="report-modal-backdrop" data-close-report></div>
           <div class="report-modal-content">
             <button class="close-report-button" type="button" data-close-report aria-label="Fechar boletim">×</button>
-          <article class="report-sheet">
-            <p id="report-school-name" class="report-school">EMEF Procópio Ferreira</p>
+            <article class="report-sheet">
+            <header class="report-header">
+              <p id="report-school-name" class="report-school">EMEF Procópio Ferreira</p>
+              <p class="report-location">São Paulo — SP</p>
+            </header>
             <h2 id="report-title">Resultado de prova</h2>
 
-            <section class="report-info" aria-label="Informações da prova">
-              <p><strong>Nome da prova:</strong> Saberes e Aprendizagens da SME-SP</p>
-              <p><strong>Referente ao período:</strong> 1º, 2º, 3º e 4º Bimestre de 2026</p>
-            </section>
-
-            <p class="student-line"><strong>Turma:</strong> <span id="modal-class"></span> - <strong>Nome:</strong> <span id="modal-name"></span></p>
+            <dl class="report-info" aria-label="Informações da prova">
+              <div>
+                <dt>Nome da prova</dt>
+                <dd>Saberes e Aprendizagens da SME-SP</dd>
+              </div>
+              <div>
+                <dt>Referente ao período</dt>
+                <dd>1º, 2º e 3º  Bimestre de 2026</dd>
+              </div>
+              <div>
+                <dt>Turma / Aluna</dt>
+                <dd><span id="modal-class"></span> — <span id="modal-name"></span></dd>
+              </div>
+            </dl>
 
             <div class="report-table-wrap">
               <table class="report-table">
@@ -123,14 +134,12 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr><th rowspan="4">Português</th><td>1º Bim</td><td id="port-score-1"></td><td id="port-level-1"></td></tr>
-                  <tr><td>2º Bim</td><td id="port-score-2"></td><td id="port-level-2"></td></tr>
-                  <tr><td>3º Bim</td><td id="port-score-3"></td><td id="port-level-3"></td></tr>
-                  <tr><td>4º Bim</td><td id="port-score-4"></td><td id="port-level-4"></td></tr>
-                  <tr><th rowspan="4">Matemática</th><td>1º Bim</td><td id="math-score-1"></td><td id="math-level-1"></td></tr>
-                  <tr><td>2º Bim</td><td id="math-score-2"></td><td id="math-level-2"></td></tr>
-                  <tr><td>3º Bim</td><td id="math-score-3"></td><td id="math-level-3"></td></tr>
-                  <tr><td>4º Bim</td><td id="math-score-4"></td><td id="math-level-4"></td></tr>
+                  <tr><th rowspan="4">Português</th><td>1º Bimestre</td><td id="port-score-1">—</td><td id="port-level-1">—</td></tr>
+                  <tr><td>2º Bimestre</td><td id="port-score-2">—</td><td id="port-level-2">—</td></tr>
+                  <tr><td>3º Bimestre</td><td id="port-score-3">—</td><td id="port-level-3">—</td></tr>
+                  <tr><th rowspan="4">Matemática</th><td>1º Bimestre</td><td id="math-score-1">—</td><td id="math-level-1">—</td></tr>
+                  <tr><td>2º Bimestre</td><td id="math-score-2">—</td><td id="math-level-2">—</td></tr>
+                  <tr><td>3º Bimestre</td><td id="math-score-3">—</td><td id="math-level-3">—</td></tr>
                 </tbody>
               </table>
             </div>
@@ -148,6 +157,6 @@
 
     <div id="class-print-area" class="class-print-area" hidden></div>
 
-    <script src="/static/js/script.js?v=38"></script>
+    <script src="/static/js/script.js?v=39"></script>
   </body>
 </html>

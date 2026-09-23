@@ -122,8 +122,8 @@ function normalizeText(value) {
 function clearReport() {
   ["port", "math"].forEach((subject) => {
     for (let bimester = 1; bimester <= 4; bimester += 1) {
-      document.querySelector(`#${subject}-score-${bimester}`).textContent = "";
-      document.querySelector(`#${subject}-level-${bimester}`).textContent = "";
+      document.querySelector(`#${subject}-score-${bimester}`).textContent = "—";
+      document.querySelector(`#${subject}-level-${bimester}`).textContent = "—";
     }
   });
 }
@@ -148,8 +148,8 @@ function openReport(records) {
       return;
     }
 
-    document.querySelector(`#${subject}-score-${bimester}`).textContent = record.proficiencia ?? "";
-    document.querySelector(`#${subject}-level-${bimester}`).textContent = record.nivel ?? "";
+    document.querySelector(`#${subject}-score-${bimester}`).textContent = record.proficiencia || "—";
+    document.querySelector(`#${subject}-level-${bimester}`).textContent = record.nivel || "—";
   });
 
   reportPreview.hidden = false;
