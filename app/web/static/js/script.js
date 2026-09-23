@@ -23,6 +23,12 @@ const spreadsheetFile = document.querySelector("#spreadsheet-file");
 const importButton = document.querySelector("#import-button");
 const importStatus = document.querySelector("#import-status");
 const classPrintArea = document.querySelector("#class-print-area");
+const schoolAccessModal = document.querySelector("#school-access-modal");
+const schoolAccessForm = document.querySelector("#school-access-form");
+const schoolAccessCode = document.querySelector("#school-access-code");
+const schoolAccessTitle = document.querySelector("#school-access-title");
+const schoolAccessDescription = document.querySelector("#school-access-description");
+const schoolAccessError = document.querySelector("#school-access-error");
 let availableClasses = [];
 
 // Esta lista controla as escolas mostradas na tela.
@@ -31,14 +37,18 @@ const schools = [
     id: "procopio",
     name: "EMEF Procópio Ferreira",
     classes: null,
+    accessCode: "123456",
   },
   {
     id: "escola-exemplo",
     name: "EMEF Escola Exemplo",
-    classes: ["4A"],
+    classes: ["Turma teste"],
+    accessCode: "654321",
   },
 ];
-let selectedSchool = schools[0];
+let selectedSchool = null;
+let pendingSchoolAccess = null;
+const unlockedSchoolIds = new Set();
 
 function setStatus(message, isError = false) {
   statusMessage.textContent = message;
@@ -162,6 +172,22 @@ function closeReport() {
   document.body.classList.remove("report-open");
 }
 
+function closeSchoolAccess() {
+  schoolAccessModal.hidden = true;
+  schoolAccessForm.reset();
+  schoolAccessError.hidden = true;
+  pendingSchoolAccess = null;
+}
+
+function askForSchoolCode(school, openSchool) {
+  pendingSchoolAccess = { school, openSchool };
+  schoolAccessTitle.textContent = school.name;
+  schoolAccessDescription.textContent = "Digite o código de segurança para abrir as turmas.";
+  schoolAccessError.hidden = true;
+  schoolAccessModal.hidden = false;
+  schoolAccessCode.focus();
+}
+
 function normalizeRa(value) {
   return String(value ?? "")
     .trim()
@@ -225,6 +251,11 @@ async function searchByRa() {
     return;
   }
 
+  if (!selectedSchool || !unlockedSchoolIds.has(selectedSchool.id)) {
+    setStatus("Selecione uma escola e informe o código de acesso antes de buscar.", true);
+    return;
+  }
+
   searchButton.disabled = true;
   classStudentsPanel.hidden = true;
   reportPreview.hidden = true;
@@ -275,9 +306,8 @@ function renderSchoolTree(schoolYear, classes) {
     classesContainer.className = "tree-children school-classes";
     classesContainer.hidden = true;
 
-    schoolButton.addEventListener("click", () => {
+    const openSchool = () => {
       const expanded = schoolButton.getAttribute("aria-expanded") === "true";
-
       document.querySelectorAll(".tree-school").forEach((item) => {
         item.classList.remove("selected");
         item.querySelector(".tree-school-toggle")?.setAttribute("aria-expanded", "false");
@@ -307,6 +337,14 @@ function renderSchoolTree(schoolYear, classes) {
           classesContainer.append(createClassFolder(schoolClass));
         });
       }
+    };
+
+    schoolButton.addEventListener("click", () => {
+      if (unlockedSchoolIds.has(school.id)) {
+        openSchool();
+        return;
+      }
+      askForSchoolCode(school, openSchool);
     });
 
     schoolItem.append(schoolButton, classesContainer);
@@ -601,7 +639,32 @@ document.querySelectorAll("[data-close-report]").forEach((element) => {
   element.addEventListener("click", closeReport);
 });
 
+document.querySelectorAll("[data-close-school-access]").forEach((element) => {
+  element.addEventListener("click", closeSchoolAccess);
+});
+
+schoolAccessForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (!pendingSchoolAccess) return;
+
+  if (schoolAccessCode.value === pendingSchoolAccess.school.accessCode) {
+    const { school, openSchool } = pendingSchoolAccess;
+    unlockedSchoolIds.add(school.id);
+    closeSchoolAccess();
+    openSchool();
+    return;
+  }
+
+  schoolAccessError.textContent = "Código inválido. Tente novamente.";
+  schoolAccessError.hidden = false;
+  schoolAccessCode.select();
+});
+
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !schoolAccessModal.hidden) {
+    closeSchoolAccess();
+    return;
+  }
   if (event.key === "Escape" && !reportPreview.hidden) {
     closeReport();
   }
