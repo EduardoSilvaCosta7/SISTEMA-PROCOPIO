@@ -10,8 +10,9 @@ MAX_RECORDS = 10_000
 
 # Nomes das colunas que a planilha precisa ter na primeira linha.
 REQUIRED_COLUMNS = {
+    "prova": "prova",
+    "nomeue": "nome_ue",
     "nomealuno": "nome_aluno",
-    "anoescola": "ano_escolar",
     "turma": "turma",
     "alunora": "ra",
     "componente": "componente",
@@ -38,10 +39,9 @@ def normalize_ra(value: object) -> str:
     return re.sub(r"\.0+$", "", str(value or "").strip())
 
 
-def normalize_school_grade(value: object) -> str:
-    if isinstance(value, float) and value.is_integer():
-        return str(int(value))
-    return re.sub(r"\.0+$", "", str(value or "").strip())
+def school_grade_from_class(value: object) -> str:
+    match = re.match(r"\d+", str(value or "").strip())
+    return match.group(0) if match else ""
 
 
 def normalize_score(value: object) -> float | None:
@@ -53,11 +53,11 @@ def normalize_score(value: object) -> float | None:
         return None
 
 
-def normalize_bimester(value: object) -> int:
-    match = re.search(r"[1-4]", str(value or ""))
+def normalize_semester(value: object) -> int:
+    match = re.search(r"[1-2]", str(value or ""))
     if not match:
         raise SpreadsheetReadError(
-            "A coluna BIMESTRE deve informar um valor entre 1 e 4."
+            "A coluna SEMESTRE deve informar o 1º ou o 2º semestre."
         )
     return int(match.group(0))
 
@@ -80,10 +80,9 @@ def read_spreadsheet(contents: bytes) -> list[dict]:
     columns_by_key = {
         normalize_column_name(header): index for index, header in enumerate(headers)
     }
-    period_key = "bimestre" if "bimestre" in columns_by_key else "semestre"
     missing = [key for key in REQUIRED_COLUMNS if key not in columns_by_key]
-    if period_key not in columns_by_key:
-        missing.append("bimestre")
+    if "semestre" not in columns_by_key:
+        missing.append("semestre")
     if missing:
         raise SpreadsheetReadError(
             f"Colunas obrigatórias ausentes: {', '.join(missing)}."
@@ -105,13 +104,10 @@ def read_spreadsheet(contents: bytes) -> list[dict]:
             output_name: str(cell_value(key) or "").strip()
             for key, output_name in REQUIRED_COLUMNS.items()
         }
-        record["bimestre"] = normalize_bimester(
-            cell_value(period_key)
-        )
+        # O banco usa o nome bimestre por compatibilidade, mas a planilha informa semestre.
+        record["bimestre"] = normalize_semester(cell_value("semestre"))
         record["ra"] = ra
-        record["ano_escolar"] = normalize_school_grade(
-            cell_value("anoescola")
-        )
+        record["ano_escolar"] = school_grade_from_class(record["turma"])
         record["proficiencia"] = normalize_score(
             cell_value("proficiencia")
         )

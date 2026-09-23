@@ -607,4 +607,9 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+const requestedView = new URLSearchParams(window.location.search).get("view");
+if (requestedView === "reports") {
+  showView("reports");
+}
+
 loadClassTree();

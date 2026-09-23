@@ -442,6 +442,79 @@ button:disabled { cursor: wait; opacity: .7; }
 .report-table th, .report-table td { height: 34px; padding: 6px 7px; }
 .print-button { min-height: 58px; font-size: 16px; }
 
+/* Navegacao em formato de pilula usada na pagina inicial e na pagina Sobre. */
+.topbar {
+  min-height: auto;
+  padding: 12px 16px;
+  border-top: 2px solid var(--orange);
+  background: var(--cream);
+}
+.topbar-content {
+  display: grid;
+  width: min(1440px, 100%);
+  min-height: 66px;
+  grid-template-columns: 1fr auto 1fr;
+  margin: 0 auto;
+  padding: 0 18px;
+  border: 1px solid #d7deea;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .72);
+}
+.topbar-brand { display: flex; align-items: center; justify-self: start; }
+.topbar-logo { width: 112px; max-height: 43px; }
+.primary-nav { display: flex; align-items: center; gap: 8px; }
+.nav-link {
+  padding: 10px 17px;
+  border-radius: 999px;
+  color: #59687d;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.nav-link:hover, .nav-link.is-active { background: #fff1df; color: var(--orange-dark); }
+.topbar .year-badge {
+  min-width: 78px;
+  justify-self: end;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 9px;
+}
+.topbar .year-badge strong { font-size: 15px; }
+
+.about-page { width: min(1180px, calc(100% - 48px)); margin: 76px auto; }
+.about-hero { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); align-items: center; gap: clamp(36px, 7vw, 100px); }
+.about-banner { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 4px; object-fit: cover; }
+.about-intro { max-width: 560px; }
+.about-label { margin: 0 0 10px; color: var(--orange); font-family: var(--font-heading); font-size: 16px; font-weight: 800; }
+.about-intro h1, .about-details h2 { margin: 0; color: var(--ink); font-family: var(--font-heading); font-weight: 900; }
+.about-intro h1 { max-width: 650px; font-size: 42px; line-height: 1.1; }
+.about-intro > p:last-child { max-width: 650px; margin: 20px 0 0; color: var(--muted); font-size: 18px; line-height: 1.6; }
+.about-cta {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 26px;
+  padding: 0 26px;
+  border-radius: 12px;
+  background: var(--orange);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.about-cta:hover { background: var(--orange-dark); color: #fff; }
+.about-details { margin-top: 54px; padding: 32px 36px; border-radius: 18px; background: #ffe6b5; }
+.about-details h2 { font-size: 25px; }
+.about-details ul { display: grid; gap: 13px; margin: 20px 0 0; padding-left: 22px; color: #304459; line-height: 1.5; }
+.about-us { display: grid; justify-items: center; gap: 34px; padding-top: 52px; text-align: center; }
+.about-us .about-banner { width: min(100%, 900px); }
+.about-us .about-intro { max-width: 700px; }
+.about-us h2 { margin: 0; color: var(--ink); font-family: var(--font-heading); font-size: 36px; font-weight: 900; }
+.about-us .about-intro p { margin: 18px auto 0; color: var(--muted); font-size: 18px; line-height: 1.6; }
+
 @media (max-width: 700px) {
   .topbar, .topbar-content { min-height: 78px; }
   .topbar-content, .app { width: min(100% - 28px, 840px); }
@@ -454,6 +527,19 @@ button:disabled { cursor: wait; opacity: .7; }
   .results-workspace:has(.class-students-panel:not([hidden])) { grid-template-columns: 1fr; }
   .class-search-area input[type="search"] { width: min(230px, 100%); }
   .students-table-head, .class-student-row { grid-template-columns: minmax(0, 1fr) 82px 92px; column-gap: 8px; }
+  .topbar { padding: 10px; }
+  .topbar-content { min-height: 58px; grid-template-columns: 1fr auto 1fr; padding: 0 12px; }
+  .topbar-logo { width: 94px; max-height: 36px; }
+  .primary-nav { display: flex; justify-self: center; gap: 3px; }
+  .nav-link { padding: 8px 10px; font-size: 12px; }
+  .topbar .year-badge { display: none; }
+  .about-page { width: min(100% - 36px, 960px); margin: 48px auto; }
+  .about-hero { grid-template-columns: 1fr; gap: 32px; }
+  .about-us { gap: 26px; padding-top: 38px; }
+  .about-us h2 { font-size: 30px; }
+  .about-intro h1 { font-size: 32px; }
+  .about-intro > p:last-child { font-size: 16px; }
+  .about-details { margin-top: 38px; padding: 26px 24px; }
 }
 
 /* Cartoes de escolas: esta regra fica apos a escala geral das turmas. */

@@ -77,6 +77,12 @@ def index() -> FileResponse:
     return FileResponse(WEB_DIR / "index.html")
 
 
+@app.get("/sobre", include_in_schema=False)
+def about() -> FileResponse:
+    # Entrega a pagina com uma explicacao breve sobre o sistema.
+    return FileResponse(WEB_DIR / "sobre.html")
+
+
 @app.post("/api/search")
 async def search_student(search: StudentSearch) -> dict:
     # Busca todos os resultados do aluno informado pelo RA.

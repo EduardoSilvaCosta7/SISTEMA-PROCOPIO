@@ -4,19 +4,21 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sistema de Resultados</title>
-    <link rel="stylesheet" href="/static/css/styles.css?v=41">
+    <link rel="stylesheet" href="/static/css/styles.css?v=46">
   </head>
   <body>
     <div class="app-shell page-content">
-        <header class="topbar">
-          <div class="topbar-content">
+      <header class="topbar">
+        <div class="topbar-content">
+          <a class="topbar-brand" href="/" aria-label="Página inicial do Notaê">
             <img class="topbar-logo" src="/static/assets/notae-logo.png" alt="Notae">
-            <div class="year-badge" aria-label="Ano letivo 2026">
-              <span>Ano letivo</span>
-              <strong>2026</strong>
-            </div>
-          </div>
-        </header>
+          </a>
+          <nav class="primary-nav" aria-label="Navegação principal">
+            <a class="nav-link is-active" href="/">Início</a>
+            <a class="nav-link" href="/sobre">Sobre</a>
+          </nav>
+        </div>
+      </header>
 
     <main class="app">
       <section id="home-view" class="app-view home-view">
@@ -37,7 +39,7 @@
         <section class="upload-guide" aria-labelledby="upload-guide-title">
           <h1 id="upload-guide-title">Regras para subir planilha</h1>
           <h2>Como subir</h2>
-          <p>Organize a planilha com os títulos na primeira linha e uma informação por coluna. Ela deve conter: BIMESTRE, Código UE, Nome UE, Ano Escola, Turma, Aluno RA, Nome Aluno, Componente, Proficiência e Nível.</p>
+          <p>Organize a planilha com os títulos na primeira linha e uma informação por coluna. Ela deve conter: PROVA, SEMESTRE, Nome UE, Turma, Aluno RA, Nome Aluno, Componente, Proficiência e Nível.</p>
           <p>Cada linha deve representar o resultado de um aluno em um componente curricular. Antes de enviar, confira se os nomes estão corretos, se não faltam colunas e se os dados começam logo abaixo dos títulos.</p>
           <img class="spreadsheet-example" src="/static/assets/spreadsheet-example.png" alt="Exemplo de organização da planilha">
         </section>
@@ -146,6 +148,6 @@
 
     <div id="class-print-area" class="class-print-area" hidden></div>
 
-    <script src="/static/js/script.js?v=37"></script>
+    <script src="/static/js/script.js?v=38"></script>
   </body>
 </html>
