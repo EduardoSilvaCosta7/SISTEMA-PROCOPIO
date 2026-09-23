@@ -19,12 +19,28 @@ const reportPreview = document.querySelector("#report-preview");
 const printReportButton = document.querySelector("#print-report");
 const modalClass = document.querySelector("#modal-class");
 const modalName = document.querySelector("#modal-name");
+const reportSchoolName = document.querySelector("#report-school-name");
 const importForm = document.querySelector("#import-form");
 const spreadsheetFile = document.querySelector("#spreadsheet-file");
 const importButton = document.querySelector("#import-button");
 const importStatus = document.querySelector("#import-status");
 const classPrintArea = document.querySelector("#class-print-area");
 let selectedClass = "";
+let availableClasses = [];
+let selectedSchool = {
+  id: "procopio",
+  name: "EMEF Procópio Ferreira",
+  classes: null,
+};
+
+const schools = [
+  selectedSchool,
+  {
+    id: "escola-exemplo",
+    name: "EMEF Escola Exemplo",
+    classes: ["4A"],
+  },
+];
 
 function setStatus(message, isError = false) {
   statusMessage.textContent = message;
@@ -176,6 +192,7 @@ function clearReport() {
 
 function openReport(records) {
   clearReport();
+  reportSchoolName.textContent = selectedSchool.name;
   modalName.textContent = records[0]?.nome_aluno ?? "";
   modalClass.textContent = records[0]?.turma ?? "";
 
@@ -330,6 +347,70 @@ function renderClassTree(schoolYear, classes) {
   studentResult.append(yearItem);
 }
 
+function renderSchoolTree(schoolYear, classes) {
+  resultsWorkspace.hidden = false;
+  reportPreview.hidden = true;
+  classStudentsPanel.hidden = true;
+  selectedClass = "";
+  availableClasses = classes;
+  studentResult.innerHTML = "";
+  studentResult.className = "student-result folder-tree school-tree";
+
+  schools.forEach((school) => {
+    const schoolItem = document.createElement("div");
+    schoolItem.className = "tree-item tree-school";
+
+    const schoolButton = document.createElement("button");
+    schoolButton.className = "tree-toggle tree-school-toggle";
+    schoolButton.type = "button";
+    schoolButton.setAttribute("aria-expanded", "false");
+
+    const schoolLabel = document.createElement("strong");
+    schoolLabel.textContent = school.name;
+    schoolButton.append(schoolLabel);
+
+    const classesContainer = document.createElement("div");
+    classesContainer.className = "tree-children school-classes";
+    classesContainer.hidden = true;
+
+    schoolButton.addEventListener("click", () => {
+      const expanded = schoolButton.getAttribute("aria-expanded") === "true";
+
+      document.querySelectorAll(".tree-school").forEach((item) => {
+        item.classList.remove("selected");
+        item.querySelector(".tree-school-toggle")?.setAttribute("aria-expanded", "false");
+        const container = item.querySelector(".school-classes");
+        if (container) container.hidden = true;
+      });
+
+      if (expanded) return;
+
+      selectedSchool = school;
+      reportSchoolName.textContent = school.name;
+      schoolItem.classList.add("selected");
+      schoolButton.setAttribute("aria-expanded", "true");
+      classesContainer.hidden = false;
+      classStudentsPanel.hidden = true;
+      reportPreview.hidden = true;
+
+      if (classesContainer.childElementCount === 0) {
+        const year = document.createElement("p");
+        year.className = "tree-school-year";
+        year.textContent = String(schoolYear);
+        classesContainer.append(year);
+
+        const schoolClasses = school.classes ?? availableClasses;
+        schoolClasses.forEach((schoolClass) => {
+          classesContainer.append(createClassFolder(schoolClass));
+        });
+      }
+    });
+
+    schoolItem.append(schoolButton, classesContainer);
+    studentResult.append(schoolItem);
+  });
+}
+
 function createClassFolder(schoolClass) {
   const item = document.createElement("div");
   item.className = "tree-item tree-class";
@@ -448,7 +529,7 @@ function createMiniReport(report) {
 
   const school = document.createElement("p");
   school.className = "mini-school";
-  school.textContent = "EMEF Procópio Ferreira";
+  school.textContent = selectedSchool.name;
   const title = document.createElement("h2");
   title.textContent = "Resultado de prova";
   const testName = document.createElement("p");
@@ -551,8 +632,8 @@ async function loadClassTree() {
       hideResults("Nenhuma turma encontrada.");
       return;
     }
-    renderClassTree(payload.school_year, classes);
-    setStatus(`${classes.length} turma(s) encontrada(s). Abra uma pasta para ver os alunos.`);
+    renderSchoolTree(payload.school_year, classes);
+    setStatus(`${schools.length} escola(s) encontrada(s). Abra uma escola para ver as turmas.`);
   } catch (error) {
     hideResults(error.message, true);
   }
