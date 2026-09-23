@@ -367,7 +367,13 @@ function renderSchoolTree(schoolYear, classes) {
 
     const schoolLabel = document.createElement("strong");
     schoolLabel.textContent = school.name;
-    schoolButton.append(schoolLabel);
+    const schoolHint = document.createElement("span");
+    schoolHint.className = "tree-school-hint";
+    schoolHint.textContent = "Abrir turmas";
+    const schoolText = document.createElement("span");
+    schoolText.className = "tree-school-text";
+    schoolText.append(schoolLabel, schoolHint);
+    schoolButton.append(schoolText);
 
     const classesContainer = document.createElement("div");
     classesContainer.className = "tree-children school-classes";
