@@ -57,15 +57,15 @@ function setStatus(message, isError = false) {
 
 function showView(view) {
   const isUpload = view === "upload";
-  const isHome = view === "home";
-  homeView.hidden = !isHome;
+  const isReports = view === "reports";
+  homeView.hidden = false;
   uploadView.hidden = !isUpload;
-  resultsListView.hidden = isHome || isUpload;
+  resultsListView.hidden = !isReports;
   closeReport();
-  if (isHome || isUpload) {
+  if (!isReports) {
     classStudentsPanel.hidden = true;
   }
-  if (view === "reports") {
+  if (isReports) {
     loadClassTree();
   }
 }
