@@ -69,7 +69,6 @@ function showView(view) {
     loadClassTree();
   }
 }
- 
 
 function setImportStatus(message, isError = false) {
   importStatus.textContent = message;
@@ -309,7 +308,7 @@ function renderSchoolTree(schoolYear, classes) {
     schoolButton.append(schoolText);
 
     const classesContainer = document.createElement("div");
-    classesContainer.className = "filhos-arvore turmas-escola";
+    classesContainer.className = "filhos-arvore school-classes";
     classesContainer.hidden = true;
 
     const openSchool = () => {
@@ -317,7 +316,7 @@ function renderSchoolTree(schoolYear, classes) {
       document.querySelectorAll(".escola-arvore").forEach((item) => {
         item.classList.remove("selecionado");
         item.querySelector(".alternador-escola-arvore")?.setAttribute("aria-expanded", "false");
-        const container = item.querySelector(".turmas-escola");
+        const container = item.querySelector(".school-classes");
         if (container) container.hidden = true;
       });
 
@@ -572,11 +571,12 @@ async function printWholeClass(schoolClass, button) {
 }
 
 async function loadClassTree() {
-  studentResult.innerHTML = "";
   resultsWorkspace.hidden = false;
   classStudentsPanel.hidden = true;
   reportPreview.hidden = true;
-  setStatus("Carregando pastas de turmas...");
+  // Mostra as escolas imediatamente; as turmas reais entram quando a API responder.
+  renderSchoolTree(new Date().getFullYear(), []);
+  setStatus("Carregando turmas...");
   try {
     const payload = await requestJson("/api/classes", {});
     const classes = payload.classes || [];
