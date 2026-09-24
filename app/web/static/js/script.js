@@ -65,6 +65,7 @@ function showView(view) {
     classStudentsPanel.hidden = true;
   }
 }
+ 
 
 function setImportStatus(message, isError = false) {
   importStatus.textContent = message;
@@ -304,7 +305,7 @@ function renderSchoolTree(schoolYear, classes) {
     schoolButton.append(schoolText);
 
     const classesContainer = document.createElement("div");
-    classesContainer.className = "filhos-arvore school-classes";
+    classesContainer.className = "filhos-arvore turmas-escola";
     classesContainer.hidden = true;
 
     const openSchool = () => {
@@ -312,7 +313,7 @@ function renderSchoolTree(schoolYear, classes) {
       document.querySelectorAll(".escola-arvore").forEach((item) => {
         item.classList.remove("selecionado");
         item.querySelector(".alternador-escola-arvore")?.setAttribute("aria-expanded", "false");
-        const container = item.querySelector(".school-classes");
+        const container = item.querySelector(".turmas-escola");
         if (container) container.hidden = true;
       });
 

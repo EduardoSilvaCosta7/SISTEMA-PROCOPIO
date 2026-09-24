@@ -296,11 +296,11 @@ button:disabled { cursor: wait; opacity: .7; }
 .visualizacao-busca-resultados:not([hidden]) ~ .visualizacao-lista-resultados .painel-resultados { border-radius: 0 0 15px 15px; }
 .cabecalho-resultados { min-height: 58px; padding: 12px 18px; border-bottom: 0; }
 .cabecalho-resultados h2 { font-size: 20px; }
-.class-search-area { padding: 0 18px 11px; }
-.class-search-area .formulario-busca { display: block; }
-.class-search-area .rotulo-busca { display: none; }
-.class-search-area .controle-busca { display: block; }
-.class-search-area input[type="search"] {
+.area-busca-turma { padding: 0 18px 11px; }
+.area-busca-turma .formulario-busca { display: block; }
+.area-busca-turma .rotulo-busca { display: none; }
+.area-busca-turma .controle-busca { display: block; }
+.area-busca-turma input[type="search"] {
   width: 190px;
   min-height: 42px;
   padding: 9px 14px 9px 42px;
@@ -317,13 +317,13 @@ button:disabled { cursor: wait; opacity: .7; }
   font-size: 13px;
   font-weight: 600;
 }
-.class-search-area input[type="search"]::placeholder { color: #a84920; opacity: .9; }
-.class-search-area input[type="search"]:focus { border-color: var(--orange); background-color: #fff; box-shadow: 0 0 0 3px rgba(217, 80, 22, .14); }
-.class-search-area .controle-busca button { position: absolute; width: 1px; height: 1px; min-height: 0; padding: 0; overflow: hidden; border: 0; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
-.class-search-area .estado { margin: 8px 0 0; background: rgba(255, 255, 255, .55); }
+.area-busca-turma input[type="search"]::placeholder { color: #a84920; opacity: .9; }
+.area-busca-turma input[type="search"]:focus { border-color: var(--orange); background-color: #fff; box-shadow: 0 0 0 3px rgba(217, 80, 22, .14); }
+.area-busca-turma .controle-busca button { position: absolute; width: 1px; height: 1px; min-height: 0; padding: 0; overflow: hidden; border: 0; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.area-busca-turma .estado { margin: 8px 0 0; background: rgba(255, 255, 255, .55); }
 .arvore-pastas { padding: 7px 18px 18px; }
 .filhos-arvore { margin: 0; padding: 0; border: 0; }
-.tree-year > .alternador-arvore { display: none; }
+.ano-arvore > .alternador-arvore { display: none; }
 .turma-arvore { margin-top: 9px; }
 .turma-arvore::before { display: none; }
 .cabecalho-turma-arvore { display: flex; min-height: 52px; align-items: center; flex-direction: row; gap: 10px; padding: 0 12px 0 4px; border-radius: 12px; background: #ffb315; }
@@ -366,8 +366,8 @@ button:disabled { cursor: wait; opacity: .7; }
 .icone-botao-envio { width: 44px; height: 44px; flex-basis: 44px; }
 .icone-botao-envio svg { width: 25px; height: 25px; }
 .painel-resultados { max-height: 640px; padding-top: 24px; }
-.class-search-area { padding: 0 24px 14px; }
-.class-search-area input[type="search"] { width: 230px; min-height: 49px; padding-left: 46px; background-position-x: 15px; background-size: 21px 21px; font-size: 15px; }
+.area-busca-turma { padding: 0 24px 14px; }
+.area-busca-turma input[type="search"] { width: 230px; min-height: 49px; padding-left: 46px; background-position-x: 15px; background-size: 21px 21px; font-size: 15px; }
 .arvore-pastas { padding: 9px 24px 24px; }
 .escola-arvore { margin-top: 12px; }
 .escola-arvore:first-child { margin-top: 0; }
@@ -410,7 +410,7 @@ button:disabled { cursor: wait; opacity: .7; }
 .texto-escola-arvore { display: grid; gap: 4px; padding-right: 30px; text-align: left; }
 .texto-escola-arvore strong { font-size: 19px; }
 .dica-escola-arvore { color: #966348; font-family: var(--font-interface); font-size: 14px; font-weight: 600; }
-.school-classes { margin: 12px 0 0; padding: 0; border: 0; }
+.turmas-escola { margin: 12px 0 0; padding: 0; border: 0; }
 .ano-escola-arvore { margin: 0 0 5px; color: var(--ink); font-family: var(--font-heading); font-size: 15px; font-weight: 800; }
 
 @media (max-width: 700px) {
@@ -525,7 +525,7 @@ button:disabled { cursor: wait; opacity: .7; }
   .guia-envio { padding: 27px 23px; }
   .upload-view .formulario-importacao { grid-template-columns: 1fr; }
   .espaco-resultados:has(.painel-alunos-turma:not([hidden])) { grid-template-columns: 1fr; }
-  .class-search-area input[type="search"] { width: min(230px, 100%); }
+  .area-busca-turma input[type="search"] { width: min(230px, 100%); }
   .cabecalho-tabela-alunos, .linha-aluno-turma { grid-template-columns: minmax(0, 1fr) 82px 92px; column-gap: 8px; }
   .barra-superior { padding: 10px; }
   .conteudo-barra-superior { min-height: 58px; grid-template-columns: 1fr auto 1fr; padding: 0 12px; }
