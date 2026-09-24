@@ -1,7 +1,6 @@
 import os
 import logging
 import re
-from datetime import UTC, datetime
 
 import httpx
 
@@ -92,14 +91,12 @@ class SupabaseResultsClient:
         table: str,
         rows: list[dict],
         conflict_columns: str,
-        return_rows: bool = False,
-    ) -> list[dict]:
+    ) -> None:
         if not rows:
-            return []
+            return
 
         headers = self._headers()
-        return_mode = "representation" if return_rows else "minimal"
-        headers["Prefer"] = f"resolution=merge-duplicates,return={return_mode}"
+        headers["Prefer"] = "resolution=merge-duplicates,return=minimal"
         try:
             async with httpx.AsyncClient(
                 headers=headers,
@@ -112,18 +109,11 @@ class SupabaseResultsClient:
                     json=rows,
                 )
                 response.raise_for_status()
-                if not return_rows:
-                    return []
-                data = response.json()
         except httpx.HTTPStatusError as exc:
             self._raise_database_error(table, exc)
         except (httpx.RequestError, ValueError) as exc:
             logger.error("Supabase connection failed table=%s", table)
             raise DatabaseUnavailableError() from exc
-
-        if not isinstance(data, list):
-            raise DatabaseUnavailableError("Unexpected Supabase response")
-        return data
 
     async def _delete(self, table: str, params: dict[str, str]) -> None:
         headers = self._headers()
@@ -170,11 +160,9 @@ class SupabaseResultsClient:
 
     async def import_records(
         self,
-        filename: str,
         school_year: int,
         records: list[dict],
     ) -> dict:
-        imported_at = datetime.now(UTC).isoformat()
         students = {
             record["ra"]: {"ra": record["ra"], "nome": record["nome_aluno"]}
             for record in records
@@ -183,7 +171,6 @@ class SupabaseResultsClient:
             record["ra"]: {
                 "aluno_ra": record["ra"],
                 "ano_letivo": school_year,
-                "ano_escolar": record["ano_escolar"],
                 "turma": record["turma"],
             }
             for record in records
@@ -196,36 +183,17 @@ class SupabaseResultsClient:
         )
         bimesters = sorted({record["bimestre"] for record in records})
         for bimester in bimesters:
-            spreadsheet_rows = await self._upsert(
-                "planilhas",
-                [
-                    {
-                        "nome_arquivo": filename,
-                        "ano_letivo": school_year,
-                        "bimestre": bimester,
-                        "importado_em": imported_at,
-                    }
-                ],
-                "nome_arquivo,ano_letivo,bimestre",
-                return_rows=True,
-            )
-            if not spreadsheet_rows:
-                raise DatabaseUnavailableError()
-
-            spreadsheet_id = spreadsheet_rows[0]["id"]
             bimester_records = [
                 record for record in records if record["bimestre"] == bimester
             ]
             results = [
                 {
-                    "planilha_id": spreadsheet_id,
                     "aluno_ra": record["ra"],
                     "ano_letivo": school_year,
                     "bimestre": bimester,
                     "componente": record["componente"],
                     "proficiencia": record["proficiencia"],
                     "nivel": record["nivel"],
-                    "atualizado_em": imported_at,
                 }
                 for record in bimester_records
             ]
@@ -261,7 +229,7 @@ class SupabaseResultsClient:
         enrollments = await self._select(
             "matriculas",
             {
-                "select": "ano_letivo,ano_escolar,turma",
+                "select": "ano_letivo,turma",
                 "aluno_ra": f"eq.{ra}",
                 "order": "ano_letivo.desc",
                 "limit": "1",
@@ -284,7 +252,6 @@ class SupabaseResultsClient:
         return [
             {
                 "nome_aluno": students[0].get("nome", ""),
-                "ano_escolar": enrollment.get("ano_escolar", ""),
                 "turma": enrollment.get("turma", ""),
                 "ra": ra,
                 "componente": result.get("componente", ""),
@@ -299,7 +266,7 @@ class SupabaseResultsClient:
         enrollments = await self._select(
             "matriculas",
             {
-                "select": "aluno_ra,ano_escolar,turma",
+                "select": "aluno_ra,turma",
                 "ano_letivo": f"eq.{school_year}",
                 "turma": f"ilike.{school_class}",
                 "order": "aluno_ra.asc",
@@ -326,9 +293,6 @@ class SupabaseResultsClient:
         return [
             {
                 "nome_aluno": student.get("nome", ""),
-                "ano_escolar": enrollment_by_ra[str(student.get("ra", ""))].get(
-                    "ano_escolar", ""
-                ),
                 "turma": enrollment_by_ra[str(student.get("ra", ""))].get(
                     "turma", ""
                 ),

@@ -39,11 +39,6 @@ def normalize_ra(value: object) -> str:
     return re.sub(r"\.0+$", "", str(value or "").strip())
 
 
-def school_grade_from_class(value: object) -> str:
-    match = re.match(r"\d+", str(value or "").strip())
-    return match.group(0) if match else ""
-
-
 def normalize_score(value: object) -> float | None:
     if value in (None, ""):
         return None
@@ -107,7 +102,6 @@ def read_spreadsheet(contents: bytes) -> list[dict]:
         # O banco usa o nome bimestre por compatibilidade, mas a planilha informa semestre.
         record["bimestre"] = normalize_semester(cell_value("semestre"))
         record["ra"] = ra
-        record["ano_escolar"] = school_grade_from_class(record["turma"])
         record["proficiencia"] = normalize_score(
             cell_value("proficiencia")
         )

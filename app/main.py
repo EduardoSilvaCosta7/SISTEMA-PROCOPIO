@@ -225,7 +225,6 @@ async def import_spreadsheet(
         records = read_spreadsheet(contents)
         school_year = int(os.getenv("SCHOOL_YEAR", "2026"))
         result = await SupabaseResultsClient.from_environment().import_records(
-            filename=filename,
             school_year=school_year,
             records=records,
         )
