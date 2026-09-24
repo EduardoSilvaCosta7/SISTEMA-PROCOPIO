@@ -57,12 +57,16 @@ function setStatus(message, isError = false) {
 
 function showView(view) {
   const isUpload = view === "upload";
-  homeView.hidden = false;
+  const isHome = view === "home";
+  homeView.hidden = !isHome;
   uploadView.hidden = !isUpload;
-  resultsListView.hidden = isUpload;
+  resultsListView.hidden = isHome || isUpload;
   closeReport();
-  if (isUpload) {
+  if (isHome || isUpload) {
     classStudentsPanel.hidden = true;
+  }
+  if (view === "reports") {
+    loadClassTree();
   }
 }
  
@@ -568,18 +572,22 @@ async function printWholeClass(schoolClass, button) {
 }
 
 async function loadClassTree() {
-  hideResults("Carregando pastas de turmas...");
+  studentResult.innerHTML = "";
+  resultsWorkspace.hidden = false;
+  classStudentsPanel.hidden = true;
+  reportPreview.hidden = true;
+  setStatus("Carregando pastas de turmas...");
   try {
     const payload = await requestJson("/api/classes", {});
     const classes = payload.classes || [];
     if (classes.length === 0) {
-      hideResults("Nenhuma turma encontrada.");
+      setStatus("Nenhuma turma encontrada.");
       return;
     }
     renderSchoolTree(payload.school_year, classes);
     setStatus(`${schools.length} escola(s) encontrada(s). Abra uma escola para ver as turmas.`);
   } catch (error) {
-    hideResults(error.message, true);
+    setStatus(error.message, true);
   }
 }
 
@@ -673,8 +681,4 @@ document.addEventListener("keydown", (event) => {
 });
 
 const requestedView = new URLSearchParams(window.location.search).get("view");
-if (requestedView === "reports") {
-  showView("reports");
-}
-
-loadClassTree();
+showView(requestedView === "reports" ? "reports" : "home");
