@@ -52,7 +52,7 @@ const unlockedSchoolIds = new Set();
 
 function setStatus(message, isError = false) {
   statusMessage.textContent = message;
-  statusMessage.classList.toggle("error", isError);
+  statusMessage.classList.toggle("erro", isError);
 }
 
 function showView(view) {
@@ -69,8 +69,9 @@ function showView(view) {
 function setImportStatus(message, isError = false) {
   importStatus.textContent = message;
   importStatus.hidden = !message;
-  importStatus.classList.toggle("error", isError);
+  importStatus.classList.toggle("erro", isError);
 }
+
 
 function hideResults(message, isError = false) {
   studentResult.innerHTML = "";
@@ -90,10 +91,10 @@ function renderStudents(students, accessStudent) {
 
   students.forEach((student) => {
     const row = document.createElement("div");
-    row.className = "class-student-row";
+    row.className = "linha-aluno-turma";
 
     const identity = document.createElement("div");
-    identity.className = "student-identity";
+    identity.className = "identidade-aluno";
 
     const name = document.createElement("strong");
     name.textContent = student.nome_aluno ?? "";
@@ -107,7 +108,7 @@ function renderStudents(students, accessStudent) {
     accessButton.addEventListener("click", () => accessStudent(student, accessButton));
 
     const raCell = document.createElement("span");
-    raCell.className = "student-ra";
+    raCell.className = "ra-aluno";
     raCell.textContent = student.ra ?? "";
     row.append(identity, raCell, accessButton);
     classStudentsResult.append(row);
@@ -164,12 +165,12 @@ function openReport(records) {
 
   reportPreview.hidden = false;
   resultsWorkspace.hidden = false;
-  document.body.classList.add("report-open");
+  document.body.classList.add("boletim-aberto");
 }
 
 function closeReport() {
   reportPreview.hidden = true;
-  document.body.classList.remove("report-open");
+  document.body.classList.remove("boletim-aberto");
 }
 
 function closeSchoolAccess() {
@@ -230,10 +231,10 @@ async function loadStudentReport(student, button) {
     if (records.length === 0) {
       throw new Error("Nenhum resultado encontrado para este aluno.");
     }
-    document.querySelectorAll(".student-row, .tree-student-row, .class-student-row").forEach((row) => {
-      row.classList.remove("selected");
+    document.querySelectorAll(".linha-aluno, .linha-aluno-arvore, .linha-aluno-turma").forEach((row) => {
+      row.classList.remove("selecionado");
     });
-    button.closest(".student-row, .tree-student-row")?.classList.add("selected");
+    button.closest(".linha-aluno, .linha-aluno-arvore")?.classList.add("selecionado");
     setStatus("");
     openReport(records);
   } catch (error) {
@@ -281,36 +282,36 @@ function renderSchoolTree(schoolYear, classes) {
   classStudentsPanel.hidden = true;
   availableClasses = classes;
   studentResult.innerHTML = "";
-  studentResult.className = "student-result folder-tree school-tree";
+  studentResult.className = "resultado-aluno arvore-pastas arvore-escolas";
 
   schools.forEach((school) => {
     const schoolItem = document.createElement("div");
-    schoolItem.className = "tree-item tree-school";
+    schoolItem.className = "item-arvore escola-arvore";
 
     const schoolButton = document.createElement("button");
-    schoolButton.className = "tree-toggle tree-school-toggle";
+    schoolButton.className = "alternador-arvore alternador-escola-arvore";
     schoolButton.type = "button";
     schoolButton.setAttribute("aria-expanded", "false");
 
     const schoolLabel = document.createElement("strong");
     schoolLabel.textContent = school.name;
     const schoolHint = document.createElement("span");
-    schoolHint.className = "tree-school-hint";
+    schoolHint.className = "dica-escola-arvore";
     schoolHint.textContent = "Abrir turmas";
     const schoolText = document.createElement("span");
-    schoolText.className = "tree-school-text";
+    schoolText.className = "texto-escola-arvore";
     schoolText.append(schoolLabel, schoolHint);
     schoolButton.append(schoolText);
 
     const classesContainer = document.createElement("div");
-    classesContainer.className = "tree-children school-classes";
+    classesContainer.className = "filhos-arvore school-classes";
     classesContainer.hidden = true;
 
     const openSchool = () => {
       const expanded = schoolButton.getAttribute("aria-expanded") === "true";
-      document.querySelectorAll(".tree-school").forEach((item) => {
-        item.classList.remove("selected");
-        item.querySelector(".tree-school-toggle")?.setAttribute("aria-expanded", "false");
+      document.querySelectorAll(".escola-arvore").forEach((item) => {
+        item.classList.remove("selecionado");
+        item.querySelector(".alternador-escola-arvore")?.setAttribute("aria-expanded", "false");
         const container = item.querySelector(".school-classes");
         if (container) container.hidden = true;
       });
@@ -320,7 +321,7 @@ function renderSchoolTree(schoolYear, classes) {
       // A escola escolhida tambem define o cabecalho do boletim.
       selectedSchool = school;
       reportSchoolName.textContent = school.name;
-      schoolItem.classList.add("selected");
+      schoolItem.classList.add("selecionado");
       schoolButton.setAttribute("aria-expanded", "true");
       classesContainer.hidden = false;
       classStudentsPanel.hidden = true;
@@ -328,7 +329,7 @@ function renderSchoolTree(schoolYear, classes) {
 
       if (classesContainer.childElementCount === 0) {
         const year = document.createElement("p");
-        year.className = "tree-school-year";
+        year.className = "ano-escola-arvore";
         year.textContent = String(schoolYear);
         classesContainer.append(year);
 
@@ -354,26 +355,26 @@ function renderSchoolTree(schoolYear, classes) {
 
 function createClassFolder(schoolClass) {
   const item = document.createElement("div");
-  item.className = "tree-item tree-class";
+  item.className = "item-arvore turma-arvore";
   const header = document.createElement("div");
-  header.className = "tree-class-header";
+  header.className = "cabecalho-turma-arvore";
   const button = document.createElement("button");
-  button.className = "tree-toggle";
+  button.className = "alternador-arvore";
   button.type = "button";
   button.setAttribute("aria-expanded", "false");
 
   const chevron = document.createElement("span");
-  chevron.className = "tree-chevron";
+  chevron.className = "seta-arvore";
   chevron.textContent = "▸";
   const folder = document.createElement("span");
-  folder.className = "tree-folder-icon";
+  folder.className = "icone-pasta-arvore";
   folder.textContent = "📁";
   const label = document.createElement("strong");
   label.textContent = schoolClass;
   button.append(chevron, folder, label);
 
   const printClassButton = document.createElement("button");
-  printClassButton.className = "print-class-button";
+  printClassButton.className = "botao-imprimir-turma";
   printClassButton.type = "button";
   printClassButton.textContent = "Imprimir turma";
   printClassButton.addEventListener("click", () => {
@@ -382,7 +383,7 @@ function createClassFolder(schoolClass) {
   header.append(button, printClassButton);
 
   const studentsContainer = document.createElement("div");
-  studentsContainer.className = "tree-students";
+  studentsContainer.className = "alunos-arvore";
   studentsContainer.hidden = true;
   let loaded = false;
 
@@ -393,7 +394,7 @@ function createClassFolder(schoolClass) {
       chevron.textContent = "▸";
       folder.textContent = "📁";
       studentsContainer.hidden = true;
-      item.classList.remove("selected");
+      item.classList.remove("selecionado");
       return;
     }
 
@@ -401,10 +402,10 @@ function createClassFolder(schoolClass) {
     chevron.textContent = "▾";
     folder.textContent = "📂";
     studentsContainer.hidden = false;
-    document.querySelectorAll(".tree-class").forEach((classItem) => {
-      classItem.classList.remove("selected");
+    document.querySelectorAll(".turma-arvore").forEach((classItem) => {
+      classItem.classList.remove("selecionado");
     });
-    item.classList.add("selected");
+    item.classList.add("selecionado");
     if (loaded) {
       return;
     }
@@ -417,9 +418,9 @@ function createClassFolder(schoolClass) {
       studentsContainer.innerHTML = "";
       students.forEach((student) => {
         const row = document.createElement("div");
-        row.className = "tree-student-row";
+        row.className = "linha-aluno-arvore";
         const identity = document.createElement("div");
-        identity.className = "student-identity";
+        identity.className = "identidade-aluno";
         const name = document.createElement("strong");
         name.textContent = student.nome_aluno ?? "";
         const ra = document.createElement("span");
@@ -435,7 +436,7 @@ function createClassFolder(schoolClass) {
       });
       if (students.length === 0) {
         const empty = document.createElement("p");
-        empty.className = "tree-empty";
+        empty.className = "arvore-vazia";
         empty.textContent = "Nenhum aluno encontrado nesta turma.";
         studentsContainer.append(empty);
       }
@@ -466,10 +467,10 @@ function reportValue(records, subjectName, bimester, field) {
 
 function createMiniReport(report) {
   const article = document.createElement("article");
-  article.className = "mini-report";
+  article.className = "mini-boletim";
 
   const school = document.createElement("p");
-  school.className = "mini-school";
+  school.className = "escola-mini-boletim";
   school.textContent = selectedSchool.name;
   const title = document.createElement("h2");
   title.textContent = "Resultado de prova";
@@ -484,7 +485,7 @@ function createMiniReport(report) {
   article.append(school, title, testName, period, student);
 
   const table = document.createElement("table");
-  table.className = "mini-report-table";
+  table.className = "tabela-mini-boletim";
   const head = document.createElement("thead");
   const headRow = document.createElement("tr");
   ["Disciplina", "Bimestre", "Proficiência", "Nível"].forEach((text) => {
@@ -527,7 +528,7 @@ function renderClassPrint(reports) {
   classPrintArea.innerHTML = "";
   for (let start = 0; start < reports.length; start += 6) {
     const page = document.createElement("section");
-    page.className = "class-print-page";
+    page.className = "pagina-impressao-turma";
     reports.slice(start, start + 6).forEach((report) => {
       page.append(createMiniReport(report));
     });
@@ -546,12 +547,12 @@ async function printWholeClass(schoolClass, button) {
     }
     renderClassPrint(reports);
     classPrintArea.hidden = false;
-    document.body.classList.add("printing-class");
+    document.body.classList.add("imprimindo-turma");
     setStatus(`${reports.length} boletim(ns) preparados para impressão.`);
     window.addEventListener(
       "afterprint",
       () => {
-        document.body.classList.remove("printing-class");
+        document.body.classList.remove("imprimindo-turma");
         classPrintArea.hidden = true;
       },
       { once: true },

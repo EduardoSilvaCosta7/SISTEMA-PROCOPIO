@@ -7,47 +7,47 @@
     <link rel="stylesheet" href="/static/css/styles.css?v=51">
   </head>
   <body>
-    <div class="app-shell page-content">
-      <header class="topbar">
-        <div class="topbar-content">
-          <a class="topbar-brand" href="/" aria-label="Página inicial do Notaê">
-            <img class="topbar-logo" src="/static/assets/notae-logo.svg" alt="Notae">
+    <div class="casca-aplicacao conteudo-pagina">
+      <header class="barra-superior">
+        <div class="conteudo-barra-superior">
+          <a class="marca-barra-superior" href="/" aria-label="Página inicial do Notaê">
+            <img class="logo-barra-superior" src="/static/assets/notae-logo.svg" alt="Notae">
           </a>
-          <nav class="primary-nav" aria-label="Navegação principal">
-            <a class="nav-link is-active" href="/">Boletins</a>
-            <a class="nav-link" href="/sobre">Sobre</a>
+          <nav class="navegacao-principal" aria-label="Navegação principal">
+            <a class="link-navegacao esta-ativo" href="/">Boletins</a>
+            <a class="link-navegacao" href="/sobre">Sobre</a>
           </nav>
         </div>
       </header>
 
-    <main class="app">
-      <section id="home-view" class="app-view home-view">
-        <nav class="home-actions" aria-label="Ações principais">
-          <button id="show-upload" class="home-action" type="button">
+    <main class="aplicacao">
+      <section id="home-view" class="visualizacao-aplicacao visualizacao-inicial">
+        <nav class="acoes-iniciais" aria-label="Ações principais">
+          <button id="show-upload" class="acao-inicial" type="button">
             <img src="/static/assets/upload-spreadsheet.svg" alt="">
             <span>Subir planilha</span>
           </button>
-          <button id="show-reports" class="home-action" type="button">
+          <button id="show-reports" class="acao-inicial" type="button">
             <img src="/static/assets/view-reports.svg" alt="">
             <span>Ver boletins</span>
           </button>
         </nav>
       </section>
 
-      <section id="upload-view" class="app-view" hidden>
-        <button class="home-back" type="button" data-show-home aria-label="Voltar ao início">←</button>
-        <section class="upload-guide" aria-labelledby="upload-guide-title">
+      <section id="upload-view" class="visualizacao-aplicacao" hidden>
+        <button class="voltar-inicio" type="button" data-show-home aria-label="Voltar ao início">←</button>
+        <section class="guia-envio" aria-labelledby="upload-guide-title">
           <h1 id="upload-guide-title">Regras para subir planilha</h1>
           <h2>Como subir</h2>
           <p>Organize a planilha com os títulos na primeira linha e uma informação por coluna. Ela deve conter: PROVA, SEMESTRE, Nome UE, Turma, Aluno RA, Nome Aluno, Componente, Proficiência e Nível.</p>
           <p>Cada linha deve representar o resultado de um aluno em um componente curricular. Antes de enviar, confira se os nomes estão corretos, se não faltam colunas e se os dados começam logo abaixo dos títulos.</p>
-          <img class="spreadsheet-example" src="/static/assets/spreadsheet-example.png" alt="Exemplo de organização da planilha">
+          <img class="exemplo-planilha" src="/static/assets/spreadsheet-example.png" alt="Exemplo de organização da planilha">
         </section>
-      <section class="upload-action-panel">
-        <form id="import-form" class="import-form">
-          <label class="upload-main-button" for="spreadsheet-file">
+      <section class="painel-acao-envio">
+        <form id="import-form" class="formulario-importacao">
+          <label class="botao-principal-envio" for="spreadsheet-file">
             <span>Faça upload</span>
-            <span class="upload-button-icon" aria-hidden="true">
+            <span class="icone-botao-envio" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 16V4"></path>
                 <path d="m7 9 5-5 5 5"></path>
@@ -56,32 +56,32 @@
             </span>
           </label>
           <input id="spreadsheet-file" name="file" type="file" accept=".xlsx,.xlsm" required>
-          <button id="import-button" class="hidden-submit" type="submit" tabindex="-1">Enviar</button>
+          <button id="import-button" class="envio-oculto" type="submit" tabindex="-1">Enviar</button>
         </form>
 
-        <p id="import-status" class="status" role="status" hidden></p>
+        <p id="import-status" class="estado" role="status" hidden></p>
       </section>
       </section>
 
-      <section id="results-list-view" class="app-view">
-      <section id="results-workspace" class="results-workspace" hidden>
-        <section id="results-section" class="results-panel" aria-label="Resultados da busca">
+      <section id="results-list-view" class="visualizacao-aplicacao">
+      <section id="results-workspace" class="espaco-resultados" hidden>
+        <section id="results-section" class="painel-resultados" aria-label="Resultados da busca">
           <header class="class-search-area">
-            <form id="search-form" class="search-form">
-              <label class="search-label" for="ra-search">RA do aluno</label>
-              <div class="search-control">
+            <form id="search-form" class="formulario-busca">
+              <label class="rotulo-busca" for="ra-search">RA do aluno</label>
+              <div class="controle-busca">
                 <input id="ra-search" type="search" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="Busque por RA">
                 <button id="search-button" type="submit">Buscar</button>
               </div>
             </form>
-            <p id="status-message" class="status" role="status">Carregando pastas de turmas...</p>
+            <p id="status-message" class="estado" role="status">Carregando pastas de turmas...</p>
           </header>
-          <div id="student-result" class="student-result"></div>
+          <div id="student-result" class="resultado-aluno"></div>
         </section>
 
-        <section id="class-students-panel" class="class-students-panel" aria-label="Alunos da turma" hidden>
-          <header class="class-students-header">
-            <div class="class-students-title">
+        <section id="class-students-panel" class="painel-alunos-turma" aria-label="Alunos da turma" hidden>
+          <header class="cabecalho-alunos-turma">
+            <div class="titulo-alunos-turma">
               <img src="/static/assets/students-icon.png" alt="">
               <div>
                 <h2 id="selected-class-title">Alunos da turma</h2>
@@ -89,26 +89,26 @@
               </div>
             </div>
           </header>
-          <div class="students-table-head" aria-hidden="true">
+          <div class="cabecalho-tabela-alunos" aria-hidden="true">
             <span>Nome do aluno</span>
             <span>RA</span>
             <span>Ações</span>
           </div>
-          <div id="class-students-result" class="class-students-result"></div>
+          <div id="class-students-result" class="resultado-alunos-turma"></div>
         </section>
 
-        <aside id="report-preview" class="report-preview" role="dialog" aria-modal="true" aria-label="Boletim do aluno" hidden>
-          <div class="report-modal-backdrop" data-close-report></div>
-          <div class="report-modal-content">
-            <button class="close-report-button" type="button" data-close-report aria-label="Fechar boletim">×</button>
-            <article class="report-sheet">
-            <header class="report-header">
-              <p id="report-school-name" class="report-school">EMEF Procópio Ferreira</p>
-              <p class="report-location">São Paulo — SP</p>
+        <aside id="report-preview" class="pre-visualizacao-boletim" role="dialog" aria-modal="true" aria-label="Boletim do aluno" hidden>
+          <div class="fundo-modal-boletim" data-close-report></div>
+          <div class="conteudo-modal-boletim">
+            <button class="botao-fechar-boletim" type="button" data-close-report aria-label="Fechar boletim">×</button>
+            <article class="folha-boletim">
+            <header class="cabecalho-boletim">
+              <p id="report-school-name" class="escola-boletim">EMEF Procópio Ferreira</p>
+              <p class="local-boletim">São Paulo — SP</p>
             </header>
             <h2 id="report-title">Resultado de prova</h2>
 
-            <dl class="report-info" aria-label="Informações da prova">
+            <dl class="informacoes-boletim" aria-label="Informações da prova">
               <div>
                 <dt>Nome da prova</dt>
                 <dd>Saberes e Aprendizagens da SME-SP</dd>
@@ -123,8 +123,8 @@
               </div>
             </dl>
 
-            <div class="report-table-wrap">
-              <table class="report-table">
+            <div class="envoltorio-tabela-boletim">
+              <table class="tabela-boletim">
                 <thead>
                   <tr>
                     <th>Disciplina</th>
@@ -146,23 +146,23 @@
               </table>
             </div>
           </article>
-          <footer class="preview-actions">
-            <button id="print-report" class="print-button" type="button">Imprimir PDF</button>
+          <footer class="acoes-pre-visualizacao">
+            <button id="print-report" class="botao-impressao" type="button">Imprimir PDF</button>
           </footer>
           </div>
         </aside>
 
-        <aside id="school-access-modal" class="school-access-modal" role="dialog" aria-modal="true" aria-labelledby="school-access-title" hidden>
-          <div class="school-access-backdrop" data-close-school-access></div>
-          <form id="school-access-form" class="school-access-content">
-            <button class="school-access-close" type="button" data-close-school-access aria-label="Fechar">×</button>
-            <p class="school-access-label">Acesso da escola</p>
+        <aside id="school-access-modal" class="modal-acesso-escola" role="dialog" aria-modal="true" aria-labelledby="school-access-title" hidden>
+          <div class="fundo-acesso-escola" data-close-school-access></div>
+          <form id="school-access-form" class="conteudo-acesso-escola">
+            <button class="fechar-acesso-escola" type="button" data-close-school-access aria-label="Fechar">×</button>
+            <p class="rotulo-acesso-escola">Acesso da escola</p>
             <h2 id="school-access-title">Informe o código</h2>
             <p id="school-access-description">Digite o código de segurança para continuar.</p>
             <label for="school-access-code">Código de segurança</label>
             <input id="school-access-code" type="password" inputmode="numeric" autocomplete="off" maxlength="6" required>
-            <p id="school-access-error" class="school-access-error" role="alert" hidden></p>
-            <button class="school-access-submit" type="submit">Acessar escola</button>
+            <p id="school-access-error" class="erro-acesso-escola" role="alert" hidden></p>
+            <button class="enviar-acesso-escola" type="submit">Acessar escola</button>
           </form>
         </aside>
       </section>
@@ -171,7 +171,7 @@
     </main>
     </div>
 
-    <div id="class-print-area" class="class-print-area" hidden></div>
+    <div id="class-print-area" class="area-impressao-turma" hidden></div>
 
     <script src="/static/js/script.js?v=40"></script>
   </body>
